@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { authService } from '../services/api';
-import { FaUser, FaLock, FaUserPlus, FaSignInAlt, FaPhone } from 'react-icons/fa';
+import { FaUser, FaLock, FaUserPlus, FaSignInAlt, FaPhone, FaBug } from 'react-icons/fa';
 
 const Auth = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,11 +15,14 @@ const Auth = ({ onAuthSuccess }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
   const [useLocalStorage, setUseLocalStorage] = useState(false); // Default to using real API
+  const [showDebugMode, setShowDebugMode] = useState(false);
 
   const handleTabChange = (tab) => {
     setIsLogin(tab === 'login');
     setError(null);
+    setDebugInfo(null);
   };
 
   const handleChange = (e) => {
@@ -43,48 +46,165 @@ const Auth = ({ onAuthSuccess }) => {
     }
   };
 
+  const checkUserExistsInLocalStorage = () => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const user = users.find(u => u.email === formData.email);
+    return !!user;
+  };
+
+  const handleLocalStorageLogin = () => {
+    try {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = users.find(u => u.email === formData.email);
+      
+      if (!user) {
+        setError('User not found in local storage. Please register first.');
+        return false;
+      }
+      
+      if (user.password !== formData.password) {
+        setError('Invalid password. Please try again.');
+        return false;
+      }
+      
+      // Create mock token
+      const token = `mock-token-${Date.now()}`;
+      localStorage.setItem('token', token);
+      localStorage.setItem('currentUserEmail', formData.email);
+      
+      // Call the onAuthSuccess callback with user data
+      onAuthSuccess(user);
+      return true;
+    } catch (err) {
+      console.error('Local storage login error:', err);
+      setError('Error logging in with local storage.');
+      return false;
+    }
+  };
+
+  const handleLocalStorageRegister = () => {
+    try {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // Check if user already exists
+      if (users.some(u => u.email === formData.email)) {
+        setError('User already exists. Please log in instead.');
+        return false;
+      }
+      
+      // Create new user
+      const newUser = {
+        email: formData.email,
+        password: formData.password,
+        personalInfo: {
+          name: formData.personalInfo.name,
+          email: formData.email,
+          phone: formData.personalInfo.phone
+        },
+        education: {},
+        skills: [],
+        projects: [],
+        socialLinks: {}
+      };
+      
+      // Save user to localStorage
+      localStorage.setItem('users', JSON.stringify([...users, newUser]));
+      
+      // Create mock token
+      const token = `mock-token-${Date.now()}`;
+      localStorage.setItem('token', token);
+      localStorage.setItem('currentUserEmail', formData.email);
+      
+      // Call the onAuthSuccess callback with user data
+      onAuthSuccess(newUser);
+      return true;
+    } catch (err) {
+      console.error('Local storage registration error:', err);
+      setError('Error registering with local storage.');
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setDebugInfo(null);
 
     try {
-      // Normal API flow
-      let response;
-      
-      if (isLogin) {
-        // Handle login
-        response = await authService.login({
-          email: formData.email,
-          password: formData.password
-        });
+      // Check if using local storage mode
+      if (useLocalStorage) {
+        const success = isLogin 
+          ? handleLocalStorageLogin() 
+          : handleLocalStorageRegister();
+        
+        if (!success) {
+          setIsLoading(false);
+          return;
+        }
       } else {
-        // For registration, ensure personal info email matches account email
-        const registrationData = {
-          email: formData.email,
-          password: formData.password,
-          personalInfo: {
-            name: formData.personalInfo.name,
-            email: formData.email, // Ensure emails match
-            phone: formData.personalInfo.phone
+        // Normal API flow
+        let response;
+        
+        if (isLogin) {
+          // Handle login
+          try {
+            response = await authService.login({
+              email: formData.email,
+              password: formData.password
+            });
+            
+            // Store token in localStorage
+            if (response.success && response.data.token) {
+              localStorage.setItem('token', response.data.token);
+              localStorage.setItem('currentUserEmail', formData.email);
+              
+              // Call the onAuthSuccess callback with user data
+              onAuthSuccess(response.data.user);
+            } else {
+              setError('Authentication failed. Please try again.');
+            }
+          } catch (err) {
+            if (showDebugMode) {
+              // Check if user exists in local storage
+              const existsInLocalStorage = checkUserExistsInLocalStorage();
+              setDebugInfo({
+                error: err.message,
+                statusCode: err.response?.status,
+                serverMessage: err.response?.data?.message,
+                existsInLocalStorage
+              });
+            }
+            throw err;
           }
-        };
-        
-        console.log('Sending registration data:', registrationData);
-        
-        // Handle registration
-        response = await authService.register(registrationData);
-      }
-
-      // Store token in localStorage
-      if (response.success && response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('currentUserEmail', formData.email);
-        
-        // Call the onAuthSuccess callback with user data
-        onAuthSuccess(response.data.user);
-      } else {
-        setError('Authentication failed. Please try again.');
+        } else {
+          // For registration, ensure personal info email matches account email
+          const registrationData = {
+            email: formData.email,
+            password: formData.password,
+            personalInfo: {
+              name: formData.personalInfo.name,
+              email: formData.email, // Ensure emails match
+              phone: formData.personalInfo.phone
+            }
+          };
+          
+          console.log('Sending registration data:', registrationData);
+          
+          // Handle registration
+          response = await authService.register(registrationData);
+          
+          // Store token in localStorage
+          if (response.success && response.data.token) {
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('currentUserEmail', formData.email);
+            
+            // Call the onAuthSuccess callback with user data
+            onAuthSuccess(response.data.user);
+          } else {
+            setError('Registration failed. Please try again.');
+          }
+        }
       }
     } catch (err) {
       console.error('Auth error:', err);
@@ -116,6 +236,16 @@ const Auth = ({ onAuthSuccess }) => {
     }
   };
 
+  const toggleStorageMode = () => {
+    setUseLocalStorage(!useLocalStorage);
+    setError(null);
+    setDebugInfo(null);
+  };
+
+  const toggleDebugMode = () => {
+    setShowDebugMode(!showDebugMode);
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-content">
@@ -143,6 +273,13 @@ const Auth = ({ onAuthSuccess }) => {
           {useLocalStorage && (
             <div className="info-message">
               Using local storage mode (for development only)
+            </div>
+          )}
+          
+          {showDebugMode && debugInfo && (
+            <div className="debug-info">
+              <h3>Debug Information</h3>
+              <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
             </div>
           )}
 
@@ -224,6 +361,26 @@ const Auth = ({ onAuthSuccess }) => {
                 ? 'Sign In' 
                 : 'Create Account'}
           </button>
+          
+          <div className="auth-buttons-container">
+            <button 
+              type="button" 
+              className="secondary-btn"
+              onClick={toggleStorageMode}
+            >
+              {useLocalStorage 
+                ? 'Switch to Server Mode' 
+                : 'Switch to Local Storage Mode'}
+            </button>
+            
+            <button 
+              type="button" 
+              className="debug-btn"
+              onClick={toggleDebugMode}
+            >
+              <FaBug /> {showDebugMode ? 'Hide Debug Info' : 'Show Debug Info'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

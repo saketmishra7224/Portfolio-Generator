@@ -26,36 +26,56 @@ const ProjectSchema = new mongoose.Schema({
 const EducationSchema = new mongoose.Schema({
   college: {
     type: String,
-    required: true,
+    default: '',
     trim: true
   },
   degree: {
     type: String,
-    required: true,
+    default: '',
     trim: true
   },
   specialization: {
     type: String,
-    required: true,
+    default: '',
     trim: true
   },
   cgpa: {
     type: String,
-    required: true,
+    default: '',
     trim: true
   },
   summary: {
     type: String,
-    required: true
+    default: ''
   }
-});
+}, { _id: false });
 
 const SocialLinksSchema = new mongoose.Schema({
   github: {
     type: String,
+    default: '',
     trim: true
   }
-});
+}, { _id: false });
+
+const PersonalInfoSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
+  },
+  phone: {
+    type: String,
+    required: true,
+    trim: true
+  }
+}, { _id: false });
 
 const UserSchema = new mongoose.Schema({
   email: {
@@ -71,26 +91,12 @@ const UserSchema = new mongoose.Schema({
     minLength: 6
   },
   personalInfo: {
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true
-    },
-    phone: {
-      type: String,
-      required: true,
-      trim: true
-    }
+    type: PersonalInfoSchema,
+    required: true
   },
   education: {
     type: EducationSchema,
-    default: {}
+    default: () => ({})
   },
   skills: {
     type: [String],
@@ -102,7 +108,7 @@ const UserSchema = new mongoose.Schema({
   },
   socialLinks: {
     type: SocialLinksSchema,
-    default: {}
+    default: () => ({})
   },
   createdAt: {
     type: Date,
@@ -112,24 +118,39 @@ const UserSchema = new mongoose.Schema({
 
 // Hash password before saving
 UserSchema.pre('save', async function(next) {
-  if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 10);
+  try {
+    if (this.isModified('password')) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 });
 
 // Compare passwords
 UserSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    console.error('Password comparison error:', error);
+    return false;
+  }
 };
 
 // Generate JWT token
 UserSchema.methods.generateAuthToken = function() {
-  return jwt.sign(
-    { id: this._id },
-    process.env.JWT_SECRET || 'default_jwt_secret',
-    { expiresIn: '7d' }
-  );
+  try {
+    return jwt.sign(
+      { id: this._id },
+      process.env.JWT_SECRET || 'default_jwt_secret',
+      { expiresIn: '7d' }
+    );
+  } catch (error) {
+    console.error('Token generation error:', error);
+    throw error;
+  }
 };
 
 const User = mongoose.model('User', UserSchema);
