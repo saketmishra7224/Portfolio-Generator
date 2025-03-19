@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaUser, FaGraduationCap, FaCode, FaGithub, FaEdit, FaSave, FaTimes, FaFileAlt } from 'react-icons/fa';
+import { FaUser, FaGraduationCap, FaCode, FaGithub, FaEdit, FaSave, FaTimes, FaFileAlt, FaPlus, FaTrash } from 'react-icons/fa';
 import { profileService } from '../services/api';
 
 const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
@@ -90,12 +90,45 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
     }));
   };
 
+  const handleAddSkill = () => {
+    setEditedData(prev => ({
+      ...prev,
+      skills: [...prev.skills, ""]
+    }));
+  };
+
+  const handleRemoveSkill = (index) => {
+    setEditedData(prev => ({
+      ...prev,
+      skills: prev.skills.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleProjectChange = (index, field, value) => {
     setEditedData(prev => ({
       ...prev,
       projects: prev.projects.map((project, i) => 
         i === index ? { ...project, [field]: value } : project
       )
+    }));
+  };
+
+  const handleAddProject = () => {
+    setEditedData(prev => ({
+      ...prev,
+      projects: [...prev.projects, {
+        title: "",
+        technologies: "",
+        description: "",
+        link: ""
+      }]
+    }));
+  };
+
+  const handleRemoveProject = (index) => {
+    setEditedData(prev => ({
+      ...prev,
+      projects: prev.projects.filter((_, i) => i !== index)
     }));
   };
 
@@ -261,6 +294,16 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
               <div className="edit-form">
                 {projects.map((project, index) => (
                   <div key={index} className="project-item">
+                    <div className="project-header">
+                      <h3>Project #{index + 1}</h3>
+                      <button 
+                        type="button" 
+                        className="action-btn edit"
+                        onClick={() => handleRemoveProject(index)}
+                      >
+                        <FaTrash /> Remove
+                      </button>
+                    </div>
                     <div className="form-group">
                       <label>Title</label>
                       <input
@@ -294,6 +337,13 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
                     </div>
                   </div>
                 ))}
+                <button 
+                  type="button" 
+                  className="add-project-btn"
+                  onClick={handleAddProject}
+                >
+                  <FaPlus /> Add New Project
+                </button>
               </div>
             ) : (
               <div className="projects-container">
@@ -338,14 +388,28 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
             {isEditing ? (
               <div className="edit-form">
                 {skills.map((skill, index) => (
-                  <div key={index} className="form-group">
+                  <div key={index} className="form-group skill-edit-row">
                     <input
                       type="text"
                       value={skill}
                       onChange={(e) => handleSkillChange(index, e.target.value)}
                     />
+                    <button 
+                      type="button" 
+                      className="remove-skill-btn"
+                      onClick={() => handleRemoveSkill(index)}
+                    >
+                      <FaTrash />
+                    </button>
                   </div>
                 ))}
+                <button 
+                  type="button" 
+                  className="add-skill-btn"
+                  onClick={handleAddSkill}
+                >
+                  <FaPlus /> Add New Skill
+                </button>
               </div>
             ) : (
               <div className="skills-container">

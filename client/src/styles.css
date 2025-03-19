@@ -1360,4 +1360,52 @@ p {
 
 .pdf-btn svg {
   margin-right: 8px;
+}
+
+.skill-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skill-edit-row input {
+  flex: 1;
+}
+
+.remove-skill-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 5px;
+  font-size: 16px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-skill-btn:hover {
+  transform: scale(1.1);
+  color: #bd2130;
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8fc;
+}
+
+.project-header h3 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: #4a6cf7;
+}
+
+/* Projects Section Styles */
+.projects-container {
+  margin-bottom: 25px;
 } 
