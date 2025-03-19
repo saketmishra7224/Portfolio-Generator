@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { authService } from '../services/api';
+import { FaUser, FaLock, FaUserPlus, FaSignInAlt, FaPhone } from 'react-icons/fa';
 
 const Auth = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -123,45 +124,54 @@ const Auth = ({ onAuthSuccess }) => {
             className={`tab-btn ${isLogin ? 'active' : ''}`}
             onClick={() => handleTabChange('login')}
           >
-            Sign In
+            <FaSignInAlt /> Sign In
           </button>
           <button 
             className={`tab-btn ${!isLogin ? 'active' : ''}`}
             onClick={() => handleTabChange('register')}
           >
-            Sign Up
+            <FaUserPlus /> Sign Up
           </button>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
-        
-        {useLocalStorage && (
-          <div className="info-message">
-            Using local storage mode (for development only)
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="auth-form">
+          <h1>{isLogin ? 'Welcome Back' : 'Create Account'}</h1>
+          <p>{isLogin ? 'Sign in to manage your portfolio' : 'Register to create your professional portfolio'}</p>
+
+          {error && <div className="error-message">{error}</div>}
+          
+          {useLocalStorage && (
+            <div className="info-message">
+              Using local storage mode (for development only)
+            </div>
+          )}
+
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">
+              <FaUser /> Email
+            </label>
             <input
               type="email"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
+              placeholder="Enter your email"
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">
+              <FaLock /> Password
+            </label>
             <input
               type="password"
               id="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
+              placeholder="Enter your password"
               required
               minLength={6}
             />
@@ -172,25 +182,31 @@ const Auth = ({ onAuthSuccess }) => {
               <h3>Personal Information</h3>
               
               <div className="form-group">
-                <label htmlFor="name">Full Name</label>
+                <label htmlFor="name">
+                  <FaUser /> Full Name
+                </label>
                 <input
                   type="text"
                   id="name"
                   name="personalInfo.name"
                   value={formData.personalInfo.name}
                   onChange={handleChange}
+                  placeholder="Enter your full name"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="phone">Phone Number</label>
+                <label htmlFor="phone">
+                  <FaPhone /> Phone Number
+                </label>
                 <input
                   type="tel"
                   id="phone"
                   name="personalInfo.phone"
                   value={formData.personalInfo.phone}
                   onChange={handleChange}
+                  placeholder="Enter your phone number"
                   required
                 />
               </div>

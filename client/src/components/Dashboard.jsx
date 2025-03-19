@@ -111,15 +111,18 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Manage Your Portfolio</h1>
+        <div className="dashboard-title">
+          <h1>Manage Your Portfolio</h1>
+          <p>Edit and manage your portfolio details</p>
+        </div>
         <div className="dashboard-actions">
-          <button onClick={handleEdit} className="edit-btn" disabled={isLoading || isEditing}>
+          <button onClick={handleEdit} className="action-btn edit" disabled={isLoading || isEditing}>
             <FaEdit /> Edit Details
           </button>
-          <button onClick={onViewPortfolio} className="view-portfolio-btn">
+          <button onClick={onViewPortfolio} className="action-btn view">
             <FaFileAlt /> View Portfolio
           </button>
-          <button onClick={onLogout} className="logout-btn">
+          <button onClick={onLogout} className="action-btn logout">
             Logout
           </button>
         </div>
@@ -128,319 +131,270 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
       <div className="dashboard-content">
         {error && <div className="error-message">{error}</div>}
         
-        <div className="dashboard-grid">
+        <div className="main-content">
           {/* Profile Summary Card */}
           <div className="dashboard-card">
-            <h3>Profile Summary</h3>
+            <h2>Profile Summary</h2>
             <div className="profile-summary">
               <div className="profile-image">
                 {nameInitial}
               </div>
               <div className="profile-info">
                 <h3>{personalInfo.name}</h3>
-                <p className="profile-title">{education.degree}</p>
-                <p className="profile-location">{education.college}</p>
+                <p>{education.degree}</p>
+                <p>{education.college}</p>
               </div>
             </div>
           </div>
 
-          {/* Stats Card */}
+          {/* Personal Information Section */}
           <div className="dashboard-card">
-            <h3>Portfolio Stats</h3>
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-value">{totalProjects}</span>
-                <span className="stat-label">Projects</span>
+            <h2><FaUser /> Personal Information</h2>
+            {isEditing ? (
+              <div className="edit-form">
+                <div className="form-group">
+                  <label>Name</label>
+                  <input
+                    type="text"
+                    value={personalInfo.name}
+                    onChange={(e) => handleInputChange('personalInfo', 'name', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    value={personalInfo.email}
+                    onChange={(e) => handleInputChange('personalInfo', 'email', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input
+                    type="tel"
+                    value={personalInfo.phone}
+                    onChange={(e) => handleInputChange('personalInfo', 'phone', e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="stat-item">
-                <span className="stat-value">{totalSkills}</span>
-                <span className="stat-label">Skills</span>
+            ) : (
+              <div className="profile-section">
+                <div className="info-grid">
+                  <div className="info-label">Name:</div>
+                  <div className="info-value">{personalInfo.name}</div>
+                  <div className="info-label">Email:</div>
+                  <div className="info-value">{personalInfo.email}</div>
+                  <div className="info-label">Phone:</div>
+                  <div className="info-value">{personalInfo.phone}</div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* Quick Actions Card */}
+          {/* Education Section */}
           <div className="dashboard-card">
-            <h3>Quick Actions</h3>
-            <div className="action-buttons">
-              <button onClick={onViewPortfolio} className="action-btn view-btn">
-                <FaFileAlt className="action-icon" />
-                View Portfolio
-              </button>
-              {socialLinks.github && (
-                <a 
-                  href={socialLinks.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="action-btn"
-                >
-                  <FaGithub className="action-icon" />
-                  Visit GitHub
-                </a>
-              )}
-            </div>
+            <h2><FaGraduationCap /> Education</h2>
+            {isEditing ? (
+              <div className="edit-form">
+                <div className="form-group">
+                  <label>College</label>
+                  <input
+                    type="text"
+                    value={education.college}
+                    onChange={(e) => handleInputChange('education', 'college', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Degree</label>
+                  <input
+                    type="text"
+                    value={education.degree}
+                    onChange={(e) => handleInputChange('education', 'degree', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Specialization</label>
+                  <input
+                    type="text"
+                    value={education.specialization}
+                    onChange={(e) => handleInputChange('education', 'specialization', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>CGPA</label>
+                  <input
+                    type="text"
+                    value={education.cgpa}
+                    onChange={(e) => handleInputChange('education', 'cgpa', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Summary</label>
+                  <textarea
+                    value={education.summary}
+                    onChange={(e) => handleInputChange('education', 'summary', e.target.value)}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="profile-section">
+                <div className="info-grid">
+                  <div className="info-label">College:</div>
+                  <div className="info-value">{education.college}</div>
+                  <div className="info-label">Degree:</div>
+                  <div className="info-value">{education.degree}</div>
+                  <div className="info-label">Specialization:</div>
+                  <div className="info-value">{education.specialization}</div>
+                  <div className="info-label">CGPA:</div>
+                  <div className="info-value">{education.cgpa}</div>
+                  <div className="info-label">Summary:</div>
+                  <div className="info-value">{education.summary}</div>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Recent Projects Card */}
-          <div className="dashboard-card recent-projects">
-            <h3>Recent Projects</h3>
-            {projects.length > 0 ? (
-              <div className="projects-list">
+          {/* Projects Section */}
+          <div className="dashboard-card">
+            <h2><FaCode /> Projects</h2>
+            {isEditing ? (
+              <div className="edit-form">
                 {projects.map((project, index) => (
                   <div key={index} className="project-item">
-                    <h4>{project.title}</h4>
-                    <p className="project-tech">{project.technologies}</p>
-                    <p className="project-desc">{project.description}</p>
+                    <div className="form-group">
+                      <label>Title</label>
+                      <input
+                        type="text"
+                        value={project.title}
+                        onChange={(e) => handleProjectChange(index, 'title', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Technologies</label>
+                      <input
+                        type="text"
+                        value={project.technologies}
+                        onChange={(e) => handleProjectChange(index, 'technologies', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Description</label>
+                      <textarea
+                        value={project.description}
+                        onChange={(e) => handleProjectChange(index, 'description', e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Link</label>
+                      <input
+                        type="url"
+                        value={project.link}
+                        onChange={(e) => handleProjectChange(index, 'link', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="projects-container">
+                {projects.map((project, index) => (
+                  <div key={index} className="project-item">
+                    <div className="project-header">
+                      <h3>{project.title}</h3>
+                    </div>
+                    <p>{project.technologies}</p>
+                    <p>{project.description}</p>
                     {project.link && (
-                      <a 
-                        href={project.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="project-link"
-                      >
+                      <a href={project.link} target="_blank" rel="noopener noreferrer">
                         View Project
                       </a>
                     )}
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="no-projects">No projects added yet</p>
             )}
           </div>
         </div>
 
-        {/* Personal Information Section */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <FaUser className="section-icon" />
-            <h2>Personal Information</h2>
+        <div className="sidebar">
+          {/* Stats Card */}
+          <div className="dashboard-card">
+            <h2>Portfolio Stats</h2>
+            <div className="stats-grid">
+              <div className="stat-item">
+                <div className="stat-number">{totalProjects}</div>
+                <div className="stat-label">Projects</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-number">{totalSkills}</div>
+                <div className="stat-label">Skills</div>
+              </div>
+            </div>
           </div>
-          {isEditing ? (
-            <div className="edit-form">
-              <div className="form-group">
-                <label>Name</label>
-                <input
-                  type="text"
-                  value={personalInfo.name}
-                  onChange={(e) => handleInputChange('personalInfo', 'name', e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  value={personalInfo.email}
-                  onChange={(e) => handleInputChange('personalInfo', 'email', e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>Phone</label>
-                <input
-                  type="tel"
-                  value={personalInfo.phone}
-                  onChange={(e) => handleInputChange('personalInfo', 'phone', e.target.value)}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="info-content">
-              <p><strong>Name:</strong> {personalInfo.name}</p>
-              <p><strong>Email:</strong> {personalInfo.email}</p>
-              <p><strong>Phone:</strong> {personalInfo.phone}</p>
-            </div>
-          )}
-        </div>
 
-        {/* Education Section */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <FaGraduationCap className="section-icon" />
-            <h2>Education</h2>
+          {/* Skills Section */}
+          <div className="dashboard-card">
+            <h2><FaCode /> Skills</h2>
+            {isEditing ? (
+              <div className="edit-form">
+                {skills.map((skill, index) => (
+                  <div key={index} className="form-group">
+                    <input
+                      type="text"
+                      value={skill}
+                      onChange={(e) => handleSkillChange(index, e.target.value)}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="skills-container">
+                {skills.map((skill, index) => (
+                  <div key={index} className="skill-item">{skill}</div>
+                ))}
+              </div>
+            )}
           </div>
-          {isEditing ? (
-            <div className="edit-form">
-              <div className="form-group">
-                <label>College</label>
-                <input
-                  type="text"
-                  value={education.college}
-                  onChange={(e) => handleInputChange('education', 'college', e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>Degree</label>
-                <input
-                  type="text"
-                  value={education.degree}
-                  onChange={(e) => handleInputChange('education', 'degree', e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>Specialization</label>
-                <input
-                  type="text"
-                  value={education.specialization}
-                  onChange={(e) => handleInputChange('education', 'specialization', e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>CGPA</label>
-                <input
-                  type="text"
-                  value={education.cgpa}
-                  onChange={(e) => handleInputChange('education', 'cgpa', e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>Summary</label>
-                <textarea
-                  value={education.summary}
-                  onChange={(e) => handleInputChange('education', 'summary', e.target.value)}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="info-content">
-              <p><strong>College:</strong> {education.college}</p>
-              <p><strong>Degree:</strong> {education.degree}</p>
-              <p><strong>Specialization:</strong> {education.specialization}</p>
-              <p><strong>CGPA:</strong> {education.cgpa}</p>
-              <p><strong>Summary:</strong> {education.summary}</p>
-            </div>
-          )}
-        </div>
 
-        {/* Skills Section */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <FaCode className="section-icon" />
-            <h2>Skills</h2>
-          </div>
-          {isEditing ? (
-            <div className="edit-form">
-              {skills.map((skill, index) => (
-                <div key={index} className="form-group">
+          {/* GitHub Section */}
+          <div className="dashboard-card">
+            <h2><FaGithub /> GitHub Profile</h2>
+            {isEditing ? (
+              <div className="edit-form">
+                <div className="form-group">
+                  <label>GitHub Link</label>
                   <input
-                    type="text"
-                    value={skill}
-                    onChange={(e) => handleSkillChange(index, e.target.value)}
+                    type="url"
+                    value={socialLinks.github}
+                    onChange={(e) => handleInputChange('socialLinks', 'github', e.target.value)}
                   />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="skills-grid">
-              {skills.map((skill, index) => (
-                <span key={index} className="skill-tag">{skill}</span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Projects Section */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <FaCode className="section-icon" />
-            <h2>Projects</h2>
-          </div>
-          {isEditing ? (
-            <div className="edit-form">
-              {projects.map((project, index) => (
-                <div key={index} className="project-edit">
-                  <div className="form-group">
-                    <label>Title</label>
-                    <input
-                      type="text"
-                      value={project.title}
-                      onChange={(e) => handleProjectChange(index, 'title', e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Technologies</label>
-                    <input
-                      type="text"
-                      value={project.technologies}
-                      onChange={(e) => handleProjectChange(index, 'technologies', e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Description</label>
-                    <textarea
-                      value={project.description}
-                      onChange={(e) => handleProjectChange(index, 'description', e.target.value)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Link</label>
-                    <input
-                      type="url"
-                      value={project.link}
-                      onChange={(e) => handleProjectChange(index, 'link', e.target.value)}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="projects-grid">
-              {projects.map((project, index) => (
-                <div key={index} className="project-card">
-                  <h3>{project.title}</h3>
-                  <p className="technologies">{project.technologies}</p>
-                  <p className="description">{project.description}</p>
-                  {project.link && (
-                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="project-link">
-                      View Project
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* GitHub Section */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <FaGithub className="section-icon" />
-            <h2>GitHub Profile</h2>
-          </div>
-          {isEditing ? (
-            <div className="edit-form">
-              <div className="form-group">
-                <label>GitHub Link</label>
-                <input
-                  type="url"
-                  value={socialLinks.github}
-                  onChange={(e) => handleInputChange('socialLinks', 'github', e.target.value)}
-                />
               </div>
-            </div>
-          ) : (
-            <div className="info-content">
-              {socialLinks.github ? (
-                <a href={socialLinks.github} target="_blank" rel="noopener noreferrer" className="github-link">
-                  View GitHub Profile
-                </a>
-              ) : (
-                <p>No GitHub profile linked</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {isEditing && (
-          <div className="edit-actions">
-            <button onClick={handleSave} className="save-btn" disabled={isLoading}>
-              <FaSave /> {isLoading ? 'Saving...' : 'Save Changes'}
-            </button>
-            <button onClick={handleCancel} className="cancel-btn" disabled={isLoading}>
-              <FaTimes /> Cancel
-            </button>
+            ) : (
+              <div className="profile-section">
+                {socialLinks.github ? (
+                  <a href={socialLinks.github} target="_blank" rel="noopener noreferrer">
+                    View GitHub Profile
+                  </a>
+                ) : (
+                  <p>No GitHub profile linked</p>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
+
+      {isEditing && (
+        <div className="dashboard-actions">
+          <button onClick={handleSave} className="primary-btn" disabled={isLoading}>
+            <FaSave /> {isLoading ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button onClick={handleCancel} className="secondary-btn" disabled={isLoading}>
+            <FaTimes /> Cancel
+          </button>
+        </div>
+      )}
     </div>
   );
 };
