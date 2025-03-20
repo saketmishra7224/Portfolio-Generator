@@ -1416,45 +1416,13 @@ p {
   margin-top: 1.5rem;
 }
 
-.debug-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.8rem;
-  background-color: #333;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.debug-btn:hover {
-  background-color: #555;
-}
-
-.debug-info {
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  overflow: auto;
-  max-height: 200px;
-}
-
-.debug-info h3 {
-  margin-top: 0;
-  color: #333;
-  font-size: 1rem;
-}
-
+/* Remove debug-related styles */
+.debug-btn,
+.debug-btn:hover,
+.debug-info,
+.debug-info h3,
 .debug-info pre {
-  font-family: monospace;
-  font-size: 0.85rem;
-  white-space: pre-wrap;
+  display: none;
 }
 
 .secondary-btn {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { authService } from '../services/api';
-import { FaUser, FaLock, FaUserPlus, FaSignInAlt, FaPhone, FaBug } from 'react-icons/fa';
+import { FaUser, FaLock, FaUserPlus, FaSignInAlt, FaPhone } from 'react-icons/fa';
 
 const Auth = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,14 +15,11 @@ const Auth = ({ onAuthSuccess }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [debugInfo, setDebugInfo] = useState(null);
   const [useLocalStorage, setUseLocalStorage] = useState(false); // Default to using real API
-  const [showDebugMode, setShowDebugMode] = useState(false);
 
   const handleTabChange = (tab) => {
     setIsLogin(tab === 'login');
     setError(null);
-    setDebugInfo(null);
   };
 
   const handleChange = (e) => {
@@ -129,7 +126,6 @@ const Auth = ({ onAuthSuccess }) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    setDebugInfo(null);
 
     try {
       // Check if using local storage mode
@@ -165,16 +161,6 @@ const Auth = ({ onAuthSuccess }) => {
               setError('Authentication failed. Please try again.');
             }
           } catch (err) {
-            if (showDebugMode) {
-              // Check if user exists in local storage
-              const existsInLocalStorage = checkUserExistsInLocalStorage();
-              setDebugInfo({
-                error: err.message,
-                statusCode: err.response?.status,
-                serverMessage: err.response?.data?.message,
-                existsInLocalStorage
-              });
-            }
             throw err;
           }
         } else {
@@ -239,11 +225,6 @@ const Auth = ({ onAuthSuccess }) => {
   const toggleStorageMode = () => {
     setUseLocalStorage(!useLocalStorage);
     setError(null);
-    setDebugInfo(null);
-  };
-
-  const toggleDebugMode = () => {
-    setShowDebugMode(!showDebugMode);
   };
 
   return (
@@ -273,13 +254,6 @@ const Auth = ({ onAuthSuccess }) => {
           {useLocalStorage && (
             <div className="info-message">
               Using local storage mode (for development only)
-            </div>
-          )}
-          
-          {showDebugMode && debugInfo && (
-            <div className="debug-info">
-              <h3>Debug Information</h3>
-              <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
             </div>
           )}
 
@@ -371,14 +345,6 @@ const Auth = ({ onAuthSuccess }) => {
               {useLocalStorage 
                 ? 'Switch to Server Mode' 
                 : 'Switch to Local Storage Mode'}
-            </button>
-            
-            <button 
-              type="button" 
-              className="debug-btn"
-              onClick={toggleDebugMode}
-            >
-              <FaBug /> {showDebugMode ? 'Hide Debug Info' : 'Show Debug Info'}
             </button>
           </div>
         </form>
