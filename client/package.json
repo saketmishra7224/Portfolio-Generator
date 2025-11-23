@@ -2,6 +2,9 @@
   "name": "portfolio-client",
   "version": "1.0.0",
   "main": "src/index.js",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "start": "react-scripts start",
     "dev": "react-scripts start",
@@ -10,8 +13,6 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@progress/kendo-drawing": "^1.21.2",
-    "@progress/kendo-react-pdf": "^10.0.0",
     "axios": "^1.8.3",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.3",

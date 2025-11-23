@@ -10,7 +10,7 @@
     "heroku-postbuild": "npm run install-server && npm run install-client && npm run build"
   },
   "engines": {
-    "node": ">=14.x"
+    "node": "20.x"
   },
   "keywords": ["portfolio", "generator", "fullstack"],
   "author": "",
