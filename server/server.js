@@ -10,6 +10,9 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
+// Set mongoose strictQuery option to suppress deprecation warning
+mongoose.set('strictQuery', false);
+
 // Middleware
 app.use(cors({
   origin: '*', // Allow all origins
@@ -75,10 +78,10 @@ app.use('/api/profile', profileRoutes);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../build')));
+  app.use(express.static(path.join(__dirname, '../client/build')));
   
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../build', 'index.html'));
+    res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
   });
 }
 

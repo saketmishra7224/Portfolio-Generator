@@ -37,7 +37,11 @@ function App() {
 
   // Check API connection
   useEffect(() => {
-    fetch('http://localhost:5000/api/test')
+    const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'http://localhost:5000/api' 
+      : '/api';
+    
+    fetch(`${baseUrl}/test`)
       .then(response => {
         if (response.ok) {
           return response.json();

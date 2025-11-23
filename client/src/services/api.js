@@ -9,8 +9,8 @@ const getBaseUrl = () => {
     return 'http://localhost:5000/api';
   }
   
-  // Otherwise use the current hostname (for network access)
-  return `http://${hostname}:5000/api`;
+  // In production (like Render), use relative path since React and API are served from same domain
+  return '/api';
 };
 
 // Create an axios instance with defaults
