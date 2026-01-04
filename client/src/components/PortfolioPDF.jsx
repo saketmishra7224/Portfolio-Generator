@@ -1,9 +1,22 @@
 import React from 'react';
-import { FaArrowLeft, FaDownload, FaEnvelope, FaPhone, FaGithub } from 'react-icons/fa';
+import { FaArrowLeft, FaDownload } from 'react-icons/fa';
 import html2pdf from 'html2pdf.js';
+import { useTheme } from '../context/ThemeContext';
+import MinimalTemplate from './templates/MinimalTemplate';
+import ModernTemplate from './templates/ModernTemplate';
+import ClassicTemplate from './templates/ClassicTemplate';
+import ProfessionalTemplate from './templates/ProfessionalTemplate';
 
 const PortfolioPDF = ({ formData, onBack }) => {
-  const { personalInfo, education, skills, projects, socialLinks } = formData;
+  const { personalInfo } = formData;
+  const { theme } = useTheme();
+
+  // Set CSS variables dynamically based on theme
+  const themeStyles = {
+    '--accent-color': theme.accentColor || '#2563eb',
+    '--font-family': theme.font || 'Inter',
+    '--heading-color': theme.accentColor || '#2563eb'
+  };
 
   const downloadPDF = () => {
     const element = document.getElementById('portfolio-content');
@@ -18,67 +31,27 @@ const PortfolioPDF = ({ formData, onBack }) => {
     html2pdf().set(opt).from(element).save();
   };
 
+  // Render the appropriate template based on theme.template
+  const renderTemplate = () => {
+    const templateProps = { formData, themeStyles };
+    
+    switch (theme.template) {
+      case 'modern':
+        return <ModernTemplate {...templateProps} />;
+      case 'classic':
+        return <ClassicTemplate {...templateProps} />;
+      case 'professional':
+        return <ProfessionalTemplate {...templateProps} />;
+      case 'minimal':
+      default:
+        return <MinimalTemplate {...templateProps} />;
+    }
+  };
+
   return (
-    <div className="portfolio-pdf-container">
-      <div id="portfolio-content" className="portfolio-content">
-        {/* Header Section */}
-        <div className="portfolio-header">
-          <h1 className="portfolio-name">{personalInfo.name}</h1>
-          <p className="portfolio-title">{education.degree}</p>
-          <div className="portfolio-contact">
-            <div className="contact-item">
-              <FaEnvelope /> {personalInfo.email}
-            </div>
-            <div className="contact-item">
-              <FaPhone /> {personalInfo.phone}
-            </div>
-            {socialLinks.github && (
-              <div className="contact-item">
-                <FaGithub /> <a href={socialLinks.github} target="_blank" rel="noopener noreferrer">
-                  GitHub
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Education Section */}
-        <div className="portfolio-section">
-          <h2>Education</h2>
-          <div className="pdf-education">
-            <h3>{education.college}</h3>
-            <p>{education.degree} in {education.specialization}</p>
-            <p>CGPA: {education.cgpa}</p>
-            <p>{education.summary}</p>
-          </div>
-        </div>
-
-        {/* Skills Section */}
-        <div className="portfolio-section">
-          <h2>Skills</h2>
-          <div className="pdf-skills-list">
-            {skills.map((skill, index) => (
-              <span key={index} className="pdf-skill-item">{skill}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* Projects Section */}
-        <div className="portfolio-section">
-          <h2>Projects</h2>
-          {projects.map((project, index) => (
-            <div key={index} className="pdf-project-item">
-              <h3 className="pdf-project-title">{project.title}</h3>
-              <p className="pdf-project-tech">{project.technologies}</p>
-              <p className="pdf-project-desc">{project.description}</p>
-              {project.link && (
-                <a href={project.link} target="_blank" rel="noopener noreferrer" className="pdf-project-link">
-                  View Project
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
+    <div className="portfolio-pdf-container" style={themeStyles}>
+      <div id="portfolio-content" className="portfolio-content" style={themeStyles}>
+        {renderTemplate()}
       </div>
 
       <div className="pdf-actions">

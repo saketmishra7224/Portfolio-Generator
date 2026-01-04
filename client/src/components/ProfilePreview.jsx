@@ -1,10 +1,19 @@
 import React from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 const ProfilePreview = ({ formData, onConfirm, onBack }) => {
   const { personalInfo, education, skills, projects, socialLinks } = formData;
+  const { theme } = useTheme();
+
+  // Set CSS variables dynamically based on theme
+  const themeStyles = {
+    '--accent-color': theme.accentColor || '#2563eb',
+    '--font-family': theme.font || 'Inter',
+    '--heading-color': theme.accentColor || '#2563eb'
+  };
 
   return (
-    <div className="profile-preview-container">
+    <div className="profile-preview-container" style={themeStyles}>
       <div className="profile-preview-header">
         <h1>Preview Your Portfolio</h1>
         <p>Review your information before finalizing</p>

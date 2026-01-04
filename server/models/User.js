@@ -58,6 +58,24 @@ const SocialLinksSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
+const ThemeSchema = new mongoose.Schema({
+  template: {
+    type: String,
+    default: 'minimal',
+    trim: true
+  },
+  accentColor: {
+    type: String,
+    default: '#2563eb',
+    trim: true
+  },
+  font: {
+    type: String,
+    default: 'Inter',
+    trim: true
+  }
+}, { _id: false });
+
 const PersonalInfoSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -108,6 +126,10 @@ const UserSchema = new mongoose.Schema({
   },
   socialLinks: {
     type: SocialLinksSchema,
+    default: () => ({})
+  },
+  theme: {
+    type: ThemeSchema,
     default: () => ({})
   },
   createdAt: {

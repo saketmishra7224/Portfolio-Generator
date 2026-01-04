@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { FaUser, FaGraduationCap, FaCode, FaGithub, FaEdit, FaSave, FaTimes, FaFileAlt, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaUser, FaGraduationCap, FaCode, FaGithub, FaEdit, FaSave, FaTimes, FaFileAlt, FaPlus, FaTrash, FaPalette } from 'react-icons/fa';
 import { profileService } from '../services/api';
+import ThemeCustomizer from './ThemeCustomizer';
 
 const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState(formData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'theme'
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -161,8 +163,26 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
         </div>
       </div>
 
-      <div className="dashboard-content">
-        {error && <div className="error-message">{error}</div>}
+      {/* Tab Navigation */}
+      <div className="dashboard-tabs">
+        <button
+          className={`dashboard-tab ${activeTab === 'profile' ? 'active' : ''}`}
+          onClick={() => setActiveTab('profile')}
+        >
+          <FaUser /> Profile Details
+        </button>
+        <button
+          className={`dashboard-tab ${activeTab === 'theme' ? 'active' : ''}`}
+          onClick={() => setActiveTab('theme')}
+        >
+          <FaPalette /> Theme Customization
+        </button>
+      </div>
+
+      {activeTab === 'profile' && (
+        <>
+          <div className="dashboard-content">
+            {error && <div className="error-message">{error}</div>}
         
         <div className="main-content">
           {/* Profile Summary Card */}
@@ -458,6 +478,13 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
             <FaTimes /> Cancel
           </button>
         </div>
+      )}
+        </>
+      )}
+
+      {/* Theme Customization Tab */}
+      {activeTab === 'theme' && (
+        <ThemeCustomizer />
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import Success from './components/Success';
 import Dashboard from './components/Dashboard';
 import PortfolioPDF from './components/PortfolioPDF';
 import { authService, profileService } from './services/api';
+import { ThemeProvider } from './context/ThemeContext';
 import './index.css';
 import './styles.css';
 
@@ -205,10 +206,12 @@ function App() {
   };
 
   return (
-    <div className="app">
-      {error && <div className="global-error">{error}</div>}
-      {renderStep()}
-    </div>
+    <ThemeProvider>
+      <div className="app">
+        {error && <div className="global-error">{error}</div>}
+        {renderStep()}
+      </div>
+    </ThemeProvider>
   );
 }
 

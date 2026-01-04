@@ -3,6 +3,9 @@ const router = express.Router();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 
+// Allowed template names for validation
+const ALLOWED_TEMPLATES = ['minimal', 'modern', 'classic', 'professional'];
+
 /**
  * @route   GET /api/profile
  * @desc    Get current user's profile
@@ -19,7 +22,8 @@ router.get('/', auth, async (req, res) => {
           education: req.user.education,
           skills: req.user.skills,
           projects: req.user.projects,
-          socialLinks: req.user.socialLinks
+          socialLinks: req.user.socialLinks,
+          theme: req.user.theme
         }
       }
     });
@@ -39,7 +43,7 @@ router.get('/', auth, async (req, res) => {
  */
 router.put('/', auth, async (req, res) => {
   try {
-    const { personalInfo, education, skills, projects, socialLinks } = req.body;
+    const { personalInfo, education, skills, projects, socialLinks, theme } = req.body;
 
     // Find user (from auth middleware)
     const user = req.user;
@@ -50,6 +54,23 @@ router.put('/', auth, async (req, res) => {
     if (skills) user.skills = skills;
     if (projects) user.projects = projects;
     if (socialLinks) user.socialLinks = socialLinks;
+    
+    // Handle theme updates with validation
+    if (theme) {
+      // Validate template if provided
+      if (theme.template && !ALLOWED_TEMPLATES.includes(theme.template)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid template. Allowed values: ${ALLOWED_TEMPLATES.join(', ')}`
+        });
+      }
+      
+      // Support partial theme updates
+      user.theme = {
+        ...user.theme.toObject(),
+        ...theme
+      };
+    }
 
     // Save updated user
     await user.save();
@@ -63,7 +84,8 @@ router.put('/', auth, async (req, res) => {
           education: user.education,
           skills: user.skills,
           projects: user.projects,
-          socialLinks: user.socialLinks
+          socialLinks: user.socialLinks,
+          theme: user.theme
         }
       }
     });
@@ -256,6 +278,59 @@ router.delete('/projects/:id', auth, async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: 'Server error deleting project' 
+    });
+  }
+});
+
+/**
+ * @route   PUT /api/profile/theme
+ * @desc    Update theme customization
+ * @access  Private
+ */
+router.put('/theme', auth, async (req, res) => {
+  try {
+    const { theme } = req.body;
+
+    // Validate theme object
+    if (!theme || typeof theme !== 'object') {
+      return res.status(400).json({
+        success: false,
+        message: 'Theme data is required'
+      });
+    }
+
+    // Validate template if provided
+    if (theme.template && !ALLOWED_TEMPLATES.includes(theme.template)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid template. Allowed values: ${ALLOWED_TEMPLATES.join(', ')}`
+      });
+    }
+
+    // Find user (from auth middleware)
+    const user = req.user;
+
+    // Support partial theme updates
+    user.theme = {
+      ...user.theme.toObject(),
+      ...theme
+    };
+
+    // Save updated user
+    await user.save();
+
+    // Return updated theme
+    res.json({
+      success: true,
+      data: {
+        theme: user.theme
+      }
+    });
+  } catch (error) {
+    console.error('Update theme error:', error.message);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error updating theme' 
     });
   }
 });
