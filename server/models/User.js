@@ -92,6 +92,10 @@ const PersonalInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
+  },
+  profileImage: {
+    type: String,
+    default: null
   }
 }, { _id: false });
 

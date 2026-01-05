@@ -15,7 +15,8 @@ function App() {
     personalInfo: {
       name: '',
       email: '',
-      phone: ''
+      phone: '',
+      profileImage: null
     },
     education: {
       college: '',
@@ -73,9 +74,12 @@ function App() {
         const response = await authService.getCurrentUser();
         
         if (response.success && response.data.user) {
-          // Get full profile data
+          // Get full profile data including profile image
           setFormData({
-            personalInfo: response.data.user.personalInfo || formData.personalInfo,
+            personalInfo: {
+              ...formData.personalInfo,
+              ...response.data.user.personalInfo
+            },
             education: response.data.user.education || formData.education,
             skills: response.data.user.skills || formData.skills,
             projects: response.data.user.projects || formData.projects,
@@ -111,10 +115,13 @@ function App() {
   const handleAuthSuccess = (userData) => {
     console.log("Auth success with user data:", userData);
     
-    // If user data contains profile info, populate form
+    // If user data contains profile info, populate form including profile image
     if (userData) {
       setFormData({
-        personalInfo: userData.personalInfo || formData.personalInfo,
+        personalInfo: {
+          ...formData.personalInfo,
+          ...userData.personalInfo
+        },
         education: userData.education || formData.education,
         skills: userData.skills || formData.skills,
         projects: userData.projects || formData.projects,
@@ -146,7 +153,8 @@ function App() {
       personalInfo: {
         name: '',
         email: '',
-        phone: ''
+        phone: '',
+        profileImage: null
       },
       education: {
         college: '',

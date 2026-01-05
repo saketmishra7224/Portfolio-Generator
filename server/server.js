@@ -19,8 +19,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Increase payload limit to handle base64 images (50MB limit)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Connect to MongoDB with improved error handling
 console.log('Attempting to connect to MongoDB...');
@@ -91,8 +92,12 @@ app.use((err, req, res, next) => {
   
   // Provide more helpful error messages based on error type
   let errorMessage = 'Server Error';
+  let statusCode = 500;
   
-  if (err.name === 'MongoServerError') {
+  if (err.type === 'entity.too.large' || err.name === 'PayloadTooLargeError') {
+    errorMessage = 'File size too large. Please upload a smaller image (max 50MB).';
+    statusCode = 413;
+  } else if (err.name === 'MongoServerError') {
     if (err.code === 11000) {
       errorMessage = 'Duplicate key error. This email might already be registered.';
     } else {
@@ -100,11 +105,12 @@ app.use((err, req, res, next) => {
     }
   } else if (err.name === 'ValidationError') {
     errorMessage = 'Validation error. Please check your input data.';
+    statusCode = 400;
   } else if (err.name === 'MongooseError') {
     errorMessage = 'Database connection error. MongoDB might not be running.';
   }
   
-  res.status(500).json({ 
+  res.status(statusCode).json({ 
     success: false,
     message: errorMessage,
     error: process.env.NODE_ENV === 'production' ? 'An error occurred' : err.message

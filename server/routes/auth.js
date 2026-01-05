@@ -58,7 +58,8 @@ router.post('/register', async (req, res) => {
       personalInfo: {
         name: personalInfo.name,
         email: email,  // Ensure email consistency
-        phone: personalInfo.phone
+        phone: personalInfo.phone,
+        profileImage: personalInfo.profileImage || null
       },
       education: {},
       skills: [],

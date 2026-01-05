@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FaUser, FaGraduationCap, FaCode, FaGithub, FaEdit, FaSave, FaTimes, FaFileAlt, FaPlus, FaTrash, FaPalette } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaUser, FaGraduationCap, FaCode, FaGithub, FaEdit, FaSave, FaTimes, FaFileAlt, FaPlus, FaTrash, FaPalette, FaCamera, FaExclamationTriangle } from 'react-icons/fa';
 import { profileService } from '../services/api';
 import ThemeCustomizer from './ThemeCustomizer';
 
@@ -9,6 +9,14 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'theme'
+  const [profileImage, setProfileImage] = useState(formData.personalInfo?.profileImage || null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Update profile image and editedData when formData changes (e.g., after login)
+  useEffect(() => {
+    setEditedData(formData);
+    setProfileImage(formData.personalInfo?.profileImage || null);
+  }, [formData]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -63,7 +71,18 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
       setIsEditing(false);
       setIsLoading(false);
     } catch (err) {
-      setError('Failed to save changes. Please try again.');
+      // Extract error message from response if available
+      let errorMessage = 'Failed to save changes. Please try again.';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.status === 413) {
+        errorMessage = 'Image file is too large. Please upload a smaller image (recommended: under 2MB).';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
       setIsLoading(false);
       console.error('Error saving profile:', err);
     }
@@ -75,12 +94,107 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
     setError(null);
   };
 
+  const handleDeleteProfile = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Check if we're using local storage mode
+      const token = localStorage.getItem('token');
+      if (token && token.startsWith('mock-token-')) {
+        // Using local storage mode, remove user data
+        const currentUserEmail = localStorage.getItem('currentUserEmail');
+        if (currentUserEmail) {
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          const updatedUsers = users.filter(user => user.email !== currentUserEmail);
+          localStorage.setItem('users', JSON.stringify(updatedUsers));
+        }
+      } else {
+        // Using API mode
+        await profileService.deleteProfile();
+      }
+      
+      // Clear all local storage and logout
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentUserEmail');
+      
+      setIsLoading(false);
+      setShowDeleteConfirm(false);
+      
+      // Call logout to redirect to auth page
+      if (onLogout) {
+        onLogout();
+      }
+    } catch (err) {
+      let errorMessage = 'Failed to delete profile. Please try again.';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      setIsLoading(false);
+      console.error('Error deleting profile:', err);
+    }
+  };
+
   const handleInputChange = (section, field, value) => {
     setEditedData(prev => ({
       ...prev,
       [section]: {
         ...prev[section],
         [field]: value
+      }
+    }));
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+
+      // Validate file size (max 2MB recommended for better performance)
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxSize) {
+        setError(`Image size should be less than 2MB. Current size: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+        return;
+      }
+
+      // Clear any previous errors
+      setError(null);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageDataUrl = reader.result;
+        setProfileImage(imageDataUrl);
+        setEditedData(prev => ({
+          ...prev,
+          personalInfo: {
+            ...prev.personalInfo,
+            profileImage: imageDataUrl
+          }
+        }));
+      };
+      reader.onerror = () => {
+        setError('Failed to read image file. Please try again.');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setProfileImage(null);
+    setEditedData(prev => ({
+      ...prev,
+      personalInfo: {
+        ...prev.personalInfo,
+        profileImage: null
       }
     }));
   };
@@ -189,8 +303,37 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
           <div className="dashboard-card">
             <h2>Profile Summary</h2>
             <div className="profile-summary">
-              <div className="profile-image">
-                {nameInitial}
+              <div className="profile-image-container">
+                <div className="profile-image">
+                  {profileImage ? (
+                    <img src={profileImage} alt="Profile" />
+                  ) : (
+                    <span className="profile-initial">{nameInitial}</span>
+                  )}
+                </div>
+                {isEditing && (
+                  <div className="profile-image-actions">
+                    <label htmlFor="profile-image-upload" className="upload-btn">
+                      <FaCamera /> Upload Photo
+                    </label>
+                    <input
+                      id="profile-image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      style={{ display: 'none' }}
+                    />
+                    {profileImage && (
+                      <button 
+                        type="button" 
+                        className="remove-image-btn"
+                        onClick={handleRemoveImage}
+                      >
+                        <FaTimes /> Remove
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="profile-info">
                 <h3>{personalInfo.name}</h3>
@@ -485,6 +628,54 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
       {/* Theme Customization Tab */}
       {activeTab === 'theme' && (
         <ThemeCustomizer />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-modal">
+            <div className="modal-header">
+              <FaExclamationTriangle className="warning-icon" />
+              <h2>Delete Profile</h2>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete your profile?</p>
+              <p className="warning-text">
+                This action cannot be undone. All your data including personal information, 
+                projects, skills, and education will be permanently deleted.
+              </p>
+            </div>
+            <div className="modal-actions">
+              <button 
+                onClick={handleDeleteProfile} 
+                className="danger-btn" 
+                disabled={isLoading}
+              >
+                <FaTrash /> {isLoading ? 'Deleting...' : 'Yes, Delete Profile'}
+              </button>
+              <button 
+                onClick={() => setShowDeleteConfirm(false)} 
+                className="secondary-btn"
+                disabled={isLoading}
+              >
+                <FaTimes /> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Profile Button (Fixed Position) */}
+      {!isEditing && (
+        <div className="danger-zone">
+          <button 
+            onClick={() => setShowDeleteConfirm(true)} 
+            className="delete-profile-btn"
+            title="Delete Profile"
+          >
+            <FaTrash /> Delete Profile
+          </button>
+        </div>
       )}
     </div>
   );

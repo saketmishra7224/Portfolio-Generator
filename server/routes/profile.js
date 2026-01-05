@@ -335,4 +335,27 @@ router.put('/theme', auth, async (req, res) => {
   }
 });
 
+/**
+ * @route   DELETE /api/profile
+ * @desc    Delete user profile and account
+ * @access  Private
+ */
+router.delete('/', auth, async (req, res) => {
+  try {
+    // Find and delete the user
+    await User.findByIdAndDelete(req.user._id);
+    
+    res.json({
+      success: true,
+      message: 'Profile deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete profile error:', error.message);
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error deleting profile' 
+    });
+  }
+});
+
 module.exports = router; 

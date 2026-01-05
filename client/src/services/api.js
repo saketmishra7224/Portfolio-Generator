@@ -139,6 +139,11 @@ export const profileService = {
   updateTheme: async (themeData) => {
     const response = await api.put('/profile/theme', { theme: themeData });
     return response.data;
+  },
+  
+  deleteProfile: async () => {
+    const response = await api.delete('/profile');
+    return response.data;
   }
 };
 

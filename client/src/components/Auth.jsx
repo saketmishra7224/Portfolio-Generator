@@ -96,7 +96,8 @@ const Auth = ({ onAuthSuccess }) => {
         personalInfo: {
           name: formData.personalInfo.name,
           email: formData.email,
-          phone: formData.personalInfo.phone
+          phone: formData.personalInfo.phone,
+          profileImage: null
         },
         education: {},
         skills: [],
@@ -171,7 +172,8 @@ const Auth = ({ onAuthSuccess }) => {
             personalInfo: {
               name: formData.personalInfo.name,
               email: formData.email, // Ensure emails match
-              phone: formData.personalInfo.phone
+              phone: formData.personalInfo.phone,
+              profileImage: null
             }
           };
           
