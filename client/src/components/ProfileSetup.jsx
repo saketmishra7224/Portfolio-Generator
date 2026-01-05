@@ -104,41 +104,11 @@ const ProfileSetup = ({ formData, onNext }) => {
     setError(null);
     
     try {
-      // Check if we're using local storage mode
-      const token = localStorage.getItem('token');
-      if (token && token.startsWith('mock-token-')) {
-        // Using local storage mode, update user data
-        const currentUserEmail = localStorage.getItem('currentUserEmail');
-        if (currentUserEmail) {
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          
-          // Create a clean copy without circular references
-          const cleanData = JSON.parse(JSON.stringify({
-            personalInfo: localFormData.personalInfo,
-            education: localFormData.education,
-            skills: localFormData.skills,
-            projects: localFormData.projects,
-            socialLinks: localFormData.socialLinks
-          }));
-          
-          const updatedUsers = users.map(user => 
-            user.email === currentUserEmail 
-              ? { ...user, ...cleanData } 
-              : user
-          );
-          localStorage.setItem('users', JSON.stringify(updatedUsers));
-          
-          // Move to the next step in the parent component
-          onNext(localFormData);
-        }
-      } else {
-        // Using API mode
-        // Save the profile data to the backend
-        await profileService.updateProfile(localFormData);
-        
-        // Move to the next step in the parent component
-        onNext(localFormData);
-      }
+      // Save the profile data to the backend
+      await profileService.updateProfile(localFormData);
+      
+      // Move to the next step in the parent component
+      onNext(localFormData);
     } catch (err) {
       console.error('Error saving profile:', err);
       setError('Failed to save profile data. Please try again.');

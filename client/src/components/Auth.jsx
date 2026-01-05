@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { authService } from '../services/api';
-import { FaUser, FaLock, FaUserPlus, FaSignInAlt, FaPhone } from 'react-icons/fa';
+import { FaUser, FaLock, FaUserPlus, FaSignInAlt, FaPhone, FaEnvelope, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 
 const Auth = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,11 +15,51 @@ const Auth = ({ onAuthSuccess }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [useLocalStorage, setUseLocalStorage] = useState(false); // Default to using real API
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touched, setTouched] = useState({});
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 6;
+  };
+
+  const validateName = (name) => {
+    return name.length >= 2 && /^[a-zA-Z\s]+$/.test(name);
+  };
+
+  const validatePhone = (phone) => {
+    return /^[0-9+\-\s()]{10,}$/.test(phone);
+  };
 
   const handleTabChange = (tab) => {
     setIsLogin(tab === 'login');
     setError(null);
+    setFieldErrors({});
+    setTouched({});
+  };
+
+  const handleBlur = (field) => {
+    setTouched({ ...touched, [field]: true });
+    
+    const errors = {};
+    if (field === 'email' && !validateEmail(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    if (field === 'password' && !validatePassword(formData.password)) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+    if (field === 'personalInfo.name' && !isLogin && !validateName(formData.personalInfo.name)) {
+      errors['personalInfo.name'] = 'Name must be at least 2 characters and contain only letters';
+    }
+    if (field === 'personalInfo.phone' && !isLogin && !validatePhone(formData.personalInfo.phone)) {
+      errors['personalInfo.phone'] = 'Please enter a valid phone number';
+    }
+    
+    setFieldErrors({ ...fieldErrors, ...errors });
   };
 
   const handleChange = (e) => {
@@ -43,107 +83,15 @@ const Auth = ({ onAuthSuccess }) => {
     }
   };
 
-  const checkUserExistsInLocalStorage = () => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const user = users.find(u => u.email === formData.email);
-    return !!user;
-  };
-
-  const handleLocalStorageLogin = () => {
-    try {
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const user = users.find(u => u.email === formData.email);
-      
-      if (!user) {
-        setError('User not found in local storage. Please register first.');
-        return false;
-      }
-      
-      if (user.password !== formData.password) {
-        setError('Invalid password. Please try again.');
-        return false;
-      }
-      
-      // Create mock token
-      const token = `mock-token-${Date.now()}`;
-      localStorage.setItem('token', token);
-      localStorage.setItem('currentUserEmail', formData.email);
-      
-      // Call the onAuthSuccess callback with user data
-      onAuthSuccess(user);
-      return true;
-    } catch (err) {
-      console.error('Local storage login error:', err);
-      setError('Error logging in with local storage.');
-      return false;
-    }
-  };
-
-  const handleLocalStorageRegister = () => {
-    try {
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      
-      // Check if user already exists
-      if (users.some(u => u.email === formData.email)) {
-        setError('User already exists. Please log in instead.');
-        return false;
-      }
-      
-      // Create new user
-      const newUser = {
-        email: formData.email,
-        password: formData.password,
-        personalInfo: {
-          name: formData.personalInfo.name,
-          email: formData.email,
-          phone: formData.personalInfo.phone,
-          profileImage: null
-        },
-        education: {},
-        skills: [],
-        projects: [],
-        socialLinks: {}
-      };
-      
-      // Save user to localStorage
-      localStorage.setItem('users', JSON.stringify([...users, newUser]));
-      
-      // Create mock token
-      const token = `mock-token-${Date.now()}`;
-      localStorage.setItem('token', token);
-      localStorage.setItem('currentUserEmail', formData.email);
-      
-      // Call the onAuthSuccess callback with user data
-      onAuthSuccess(newUser);
-      return true;
-    } catch (err) {
-      console.error('Local storage registration error:', err);
-      setError('Error registering with local storage.');
-      return false;
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
     try {
-      // Check if using local storage mode
-      if (useLocalStorage) {
-        const success = isLogin 
-          ? handleLocalStorageLogin() 
-          : handleLocalStorageRegister();
-        
-        if (!success) {
-          setIsLoading(false);
-          return;
-        }
-      } else {
-        // Normal API flow
-        let response;
-        
-        if (isLogin) {
+      let response;
+      
+      if (isLogin) {
           // Handle login
           try {
             response = await authService.login({
@@ -191,7 +139,6 @@ const Auth = ({ onAuthSuccess }) => {
             onAuthSuccess(response.data.user);
           } else {
             setError('Registration failed. Please try again.');
-          }
         }
       }
     } catch (err) {
@@ -205,28 +152,9 @@ const Auth = ({ onAuthSuccess }) => {
           ? 'Login failed. You may need to register first.' 
           : 'Registration failed. Please try again.');
       }
-      
-      // Offer to use localStorage if API fails
-      if (!useLocalStorage) {
-        setTimeout(() => {
-          const useLocal = window.confirm(
-            "Server connection failed. Would you like to use local storage mode for development? " +
-            "(Your data will only be saved in this browser)"
-          );
-          if (useLocal) {
-            setUseLocalStorage(true);
-            setError(null);
-          }
-        }, 100);
-      }
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const toggleStorageMode = () => {
-    setUseLocalStorage(!useLocalStorage);
-    setError(null);
   };
 
   return (
@@ -252,42 +180,64 @@ const Auth = ({ onAuthSuccess }) => {
           <p>{isLogin ? 'Sign in to manage your portfolio' : 'Register to create your professional portfolio'}</p>
 
           {error && <div className="error-message">{error}</div>}
-          
-          {useLocalStorage && (
-            <div className="info-message">
-              Using local storage mode (for development only)
-            </div>
-          )}
 
           <div className="form-group">
             <label htmlFor="email">
               <FaUser /> Email
             </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              required
-            />
+            <div className="input-wrapper">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Enter your email"
+                required
+                className={touched.email ? (fieldErrors.email ? 'error' : 'valid') : ''}
+              />
+              {touched.email && !fieldErrors.email && (
+                <FaCheckCircle className="validation-icon valid" />
+              )}
+              {touched.email && fieldErrors.email && (
+                <FaExclamationCircle className="validation-icon error" />
+              )}
+            </div>
+            {touched.email && fieldErrors.email && (
+              <p className="error-message">{fieldErrors.email}</p>
+            )}
+            <p className="helper-text">We'll never share your email with anyone</p>
           </div>
 
           <div className="form-group">
             <label htmlFor="password">
               <FaLock /> Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              required
-              minLength={6}
-            />
+            <div className="input-wrapper">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Enter your password"
+                required
+                minLength={6}
+                className={touched.password ? (fieldErrors.password ? 'error' : 'valid') : ''}
+              />
+              {touched.password && !fieldErrors.password && (
+                <FaCheckCircle className="validation-icon valid" />
+              )}
+              {touched.password && fieldErrors.password && (
+                <FaExclamationCircle className="validation-icon error" />
+              )}
+            </div>
+            {touched.password && fieldErrors.password && (
+              <p className="error-message">{fieldErrors.password}</p>
+            )}
+            <p className="helper-text">Minimum 6 characters required</p>
           </div>
 
           {!isLogin && (
@@ -298,30 +248,57 @@ const Auth = ({ onAuthSuccess }) => {
                 <label htmlFor="name">
                   <FaUser /> Full Name
                 </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="personalInfo.name"
-                  value={formData.personalInfo.name}
-                  onChange={handleChange}
-                  placeholder="Enter your full name"
-                  required
-                />
+                <div className="input-wrapper">
+                  <input
+                    type="text"
+                    id="name"
+                    name="personalInfo.name"
+                    value={formData.personalInfo.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="Enter your full name"
+                    required
+                    className={touched.name ? (fieldErrors.name ? 'error' : 'valid') : ''}
+                  />
+                  {touched.name && !fieldErrors.name && (
+                    <FaCheckCircle className="validation-icon valid" />
+                  )}
+                  {touched.name && fieldErrors.name && (
+                    <FaExclamationCircle className="validation-icon error" />
+                  )}
+                </div>
+                {touched.name && fieldErrors.name && (
+                  <p className="error-message">{fieldErrors.name}</p>
+                )}
               </div>
 
               <div className="form-group">
                 <label htmlFor="phone">
                   <FaPhone /> Phone Number
                 </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="personalInfo.phone"
-                  value={formData.personalInfo.phone}
-                  onChange={handleChange}
-                  placeholder="Enter your phone number"
-                  required
-                />
+                <div className="input-wrapper">
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="personalInfo.phone"
+                    value={formData.personalInfo.phone}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="Enter your phone number"
+                    required
+                    className={touched.phone ? (fieldErrors.phone ? 'error' : 'valid') : ''}
+                  />
+                  {touched.phone && !fieldErrors.phone && (
+                    <FaCheckCircle className="validation-icon valid" />
+                  )}
+                  {touched.phone && fieldErrors.phone && (
+                    <FaExclamationCircle className="validation-icon error" />
+                  )}
+                </div>
+                {touched.phone && fieldErrors.phone && (
+                  <p className="error-message">{fieldErrors.phone}</p>
+                )}
+                <p className="helper-text">Format: +1234567890 or 1234567890</p>
               </div>
             </>
           )}
@@ -337,18 +314,6 @@ const Auth = ({ onAuthSuccess }) => {
                 ? 'Sign In' 
                 : 'Create Account'}
           </button>
-          
-          <div className="auth-buttons-container">
-            <button 
-              type="button" 
-              className="secondary-btn"
-              onClick={toggleStorageMode}
-            >
-              {useLocalStorage 
-                ? 'Switch to Server Mode' 
-                : 'Switch to Local Storage Mode'}
-            </button>
-          </div>
         </form>
       </div>
     </div>

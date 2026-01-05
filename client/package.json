@@ -13,12 +13,16 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.23",
     "axios": "^1.8.3",
+    "framer-motion": "^12.24.0",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.3",
+    "postcss": "^8.5.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.5.0",
+    "react-router-dom": "^7.11.0",
     "react-scripts": "^5.0.1"
   },
   "browserslist": {
@@ -32,5 +36,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
   }
 }

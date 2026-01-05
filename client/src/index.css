@@ -1,4 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 74 108 247;
+    --color-accent: 106 133 255;
+    --color-background: 255 255 255;
+    --color-text: 51 51 51;
+  }
+
+  .dark {
+    --color-primary: 59 95 224;
+    --color-accent: 106 133 255;
+    --color-background: 17 24 39;
+    --color-text: 243 244 246;
+  }
+}
 
 * {
   box-sizing: border-box;
@@ -7,10 +27,16 @@
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', 'Poppins', sans-serif;
   line-height: 1.6;
   background-color: #f0f2f5;
   color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark {
+  background-color: #111827;
+  color: #f3f4f6;
 }
 
 .app {

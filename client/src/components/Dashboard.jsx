@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { FaUser, FaGraduationCap, FaCode, FaGithub, FaEdit, FaSave, FaTimes, FaFileAlt, FaPlus, FaTrash, FaPalette, FaCamera, FaExclamationTriangle } from 'react-icons/fa';
 import { profileService } from '../services/api';
 import ThemeCustomizer from './ThemeCustomizer';
+import TemplateSelector from './TemplateSelector';
 
 const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState(formData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'theme'
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'theme', or 'template'
   const [profileImage, setProfileImage] = useState(formData.personalInfo?.profileImage || null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(formData.selectedTemplate || 'modern');
 
   // Update profile image and editedData when formData changes (e.g., after login)
   useEffect(() => {
@@ -28,44 +30,12 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
       setIsLoading(true);
       setError(null);
       
-      // Check if we're using local storage mode
-      const token = localStorage.getItem('token');
-      if (token && token.startsWith('mock-token-')) {
-        // Using local storage mode, update user data
-        const currentUserEmail = localStorage.getItem('currentUserEmail');
-        if (currentUserEmail) {
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          
-          // Create a clean copy without circular references
-          const cleanData = JSON.parse(JSON.stringify({
-            personalInfo: editedData.personalInfo,
-            education: editedData.education,
-            skills: editedData.skills,
-            projects: editedData.projects,
-            socialLinks: editedData.socialLinks
-          }));
-          
-          const updatedUsers = users.map(user => 
-            user.email === currentUserEmail 
-              ? { ...user, ...cleanData } 
-              : user
-          );
-          localStorage.setItem('users', JSON.stringify(updatedUsers));
-          
-          // Update parent component state
-          if (updateFormData) {
-            updateFormData(editedData);
-          }
-        }
-      } else {
-        // Using API mode
-        // Update profile on backend
-        const response = await profileService.updateProfile(editedData);
-        
-        // Update parent component state
-        if (updateFormData) {
-          updateFormData(editedData);
-        }
+      // Update profile on backend
+      const response = await profileService.updateProfile(editedData);
+      
+      // Update parent component state
+      if (updateFormData) {
+        updateFormData(editedData);
       }
       
       setIsEditing(false);
@@ -99,20 +69,8 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
       setIsLoading(true);
       setError(null);
       
-      // Check if we're using local storage mode
-      const token = localStorage.getItem('token');
-      if (token && token.startsWith('mock-token-')) {
-        // Using local storage mode, remove user data
-        const currentUserEmail = localStorage.getItem('currentUserEmail');
-        if (currentUserEmail) {
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          const updatedUsers = users.filter(user => user.email !== currentUserEmail);
-          localStorage.setItem('users', JSON.stringify(updatedUsers));
-        }
-      } else {
-        // Using API mode
-        await profileService.deleteProfile();
-      }
+      // Delete profile using API
+      await profileService.deleteProfile();
       
       // Clear all local storage and logout
       localStorage.removeItem('token');
@@ -257,6 +215,14 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
   // Get first letter of name for profile image placeholder
   const nameInitial = personalInfo.name ? personalInfo.name.charAt(0).toUpperCase() : '?';
 
+  const handleTemplateSelect = (templateId) => {
+    setSelectedTemplate(templateId);
+    setEditedData(prev => ({
+      ...prev,
+      selectedTemplate: templateId
+    }));
+  };
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -268,12 +234,6 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
           <button onClick={handleEdit} className="action-btn edit" disabled={isLoading || isEditing}>
             <FaEdit /> Edit Details
           </button>
-          <button onClick={onViewPortfolio} className="action-btn view">
-            <FaFileAlt /> View Portfolio
-          </button>
-          <button onClick={onLogout} className="action-btn logout">
-            Logout
-          </button>
         </div>
       </div>
 
@@ -284,6 +244,12 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
           onClick={() => setActiveTab('profile')}
         >
           <FaUser /> Profile Details
+        </button>
+        <button
+          className={`dashboard-tab ${activeTab === 'template' ? 'active' : ''}`}
+          onClick={() => setActiveTab('template')}
+        >
+          <FaFileAlt /> Template Selection
         </button>
         <button
           className={`dashboard-tab ${activeTab === 'theme' ? 'active' : ''}`}
@@ -628,6 +594,16 @@ const Dashboard = ({ formData, onLogout, updateFormData, onViewPortfolio }) => {
       {/* Theme Customization Tab */}
       {activeTab === 'theme' && (
         <ThemeCustomizer />
+      )}
+
+      {/* Template Selection Tab */}
+      {activeTab === 'template' && (
+        <div className="template-tab-content">
+          <TemplateSelector
+            selectedTemplate={selectedTemplate}
+            onSelectTemplate={handleTemplateSelect}
+          />
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}

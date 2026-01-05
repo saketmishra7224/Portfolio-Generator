@@ -96,6 +96,16 @@ const PersonalInfoSchema = new mongoose.Schema({
   profileImage: {
     type: String,
     default: null
+  },
+  bio: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  tagline: {
+    type: String,
+    default: '',
+    trim: true
   }
 }, { _id: false });
 

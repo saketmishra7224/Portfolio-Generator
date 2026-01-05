@@ -71,6 +71,12 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+body.dark .auth-content,
+.dark .auth-content {
+  background: rgba(31, 41, 55, 0.95);
+  border-color: rgba(55, 65, 81, 0.5);
+}
+
 .auth-tabs {
   display: flex;
   margin-bottom: 1.5rem;
@@ -93,7 +99,7 @@ body {
 
 .tab-btn svg {
   margin-right: 8px;
-  vertical-align: middle;
+  vertical-align: text-bottom;
 }
 
 .tab-btn.active {
@@ -160,7 +166,7 @@ body {
 }
 
 .auth-form .form-group {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.5rem;
 }
 
 .auth-form .form-group label {
@@ -176,18 +182,93 @@ body {
   color: #4a6cf7;
 }
 
+.auth-form .form-group .input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .auth-form .form-group input {
+  width: 100%;
   background-color: rgba(255, 255, 255, 0.9);
   border: 1px solid #ddd;
   padding: 0.8rem;
+  padding-right: 2.5rem;
   border-radius: 8px;
   transition: all 0.3s;
+  color: #2c3e50;
+}
+
+/* Dark mode for auth inputs */
+body.dark .auth-form .form-group input,
+.dark .auth-form .form-group input {
+  background-color: #111827;
+  border-color: #374151;
+  color: #e5e7eb !important;
 }
 
 .auth-form .form-group input:focus {
   border-color: #4a6cf7;
   box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
   background-color: #fff;
+  outline: none;
+}
+
+body.dark .auth-form .form-group input:focus,
+.dark .auth-form .form-group input:focus {
+  background-color: #1f2937;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.auth-form .form-group input.error {
+  border-color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.auth-form .form-group input.error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+.auth-form .form-group input.valid {
+  border-color: #28a745;
+  background-color: #f0fff4;
+}
+
+.auth-form .form-group input.valid:focus {
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+}
+
+.auth-form .form-group .validation-icon {
+  position: absolute;
+  right: 0.8rem;
+  font-size: 1.2rem;
+  pointer-events: none;
+}
+
+.auth-form .form-group .validation-icon.valid {
+  color: #28a745;
+}
+
+.auth-form .form-group .validation-icon.error {
+  color: #dc3545;
+}
+
+.auth-form .form-group .error-message {
+  background-color: #fff5f5;
+  color: #dc3545;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  border-left: 3px solid #dc3545;
+}
+
+.auth-form .form-group .helper-text {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0;
 }
 
 .auth-btn {
@@ -569,11 +650,22 @@ p {
   background-image: linear-gradient(to bottom right, #ffffff, #f5f9ff);
 }
 
+body.dark .profile-preview-container,
+.dark .profile-preview-container {
+  background: linear-gradient(to bottom right, #1f2937, #111827);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
 .profile-preview-header {
   text-align: center;
   margin-bottom: 2.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #eee;
+}
+
+body.dark .profile-preview-header,
+.dark .profile-preview-header {
+  border-bottom-color: #374151;
 }
 
 .profile-preview-header h1 {
@@ -582,9 +674,19 @@ p {
   margin-bottom: 0.5rem;
 }
 
+body.dark .profile-preview-header h1,
+.dark .profile-preview-header h1 {
+  color: #e5e7eb;
+}
+
 .profile-preview-header p {
   color: #666;
   font-size: 1.1rem;
+}
+
+body.dark .profile-preview-header p,
+.dark .profile-preview-header p {
+  color: #9ca3af;
 }
 
 /* CSS Variables for theme customization */
@@ -607,6 +709,13 @@ p {
   font-family: var(--font-family);
 }
 
+body.dark .preview-section,
+.dark .preview-section {
+  background-color: #1f2937;
+  border-bottom-color: #374151;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
 .preview-section:last-child {
   border-bottom: none;
 }
@@ -621,6 +730,11 @@ p {
   font-family: var(--font-family);
 }
 
+body.dark .preview-section h2,
+.dark .preview-section h2 {
+  color: #60a5fa;
+}
+
 .preview-item {
   margin-bottom: 1.5rem;
 }
@@ -631,9 +745,19 @@ p {
   margin-bottom: 0.5rem;
 }
 
+body.dark .preview-item h3,
+.dark .preview-item h3 {
+  color: #e5e7eb;
+}
+
 .preview-item p {
   color: #666;
   margin-bottom: 0.5rem;
+}
+
+body.dark .preview-item p,
+.dark .preview-item p {
+  color: #d1d5db;
 }
 
 .preview-nav {
@@ -642,6 +766,22 @@ p {
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid #eee;
+}
+
+.preview-item a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+body.dark .preview-item a,
+.dark .preview-item a {
+  color: #60a5fa;
+}
+
+.preview-item a:hover {
+  text-decoration: underline;
 }
 
 .skills-preview {
@@ -653,13 +793,20 @@ p {
 .skill-badge {
   display: inline-block;
   background-color: #d6e4ff;
-  color: var(--accent-color);
+  color: #2563eb;
   padding: 6px 12px;
   border-radius: 20px;
   margin: 0.25rem 0.5rem 0.25rem 0;
   font-size: 0.9rem;
   transition: all 0.2s;
   font-family: var(--font-family);
+  font-weight: 500;
+}
+
+body.dark .skill-badge,
+.dark .skill-badge {
+  background-color: #1e3a8a;
+  color: #93c5fd !important;
 }
 
 /* Dashboard Component Styles */
@@ -711,6 +858,11 @@ p {
   border-bottom: 2px solid #e0e0e0;
 }
 
+body.dark .dashboard-tabs,
+.dark .dashboard-tabs {
+  border-bottom-color: #374151;
+}
+
 .dashboard-tab {
   display: flex;
   align-items: center;
@@ -728,15 +880,33 @@ p {
   top: 2px;
 }
 
+body.dark .dashboard-tab,
+.dark .dashboard-tab {
+  color: #9ca3af;
+}
+
 .dashboard-tab:hover {
   color: #4a6cf7;
   background: #f5f8ff;
+}
+
+body.dark .dashboard-tab:hover,
+.dark .dashboard-tab:hover {
+  color: #60a5fa;
+  background: #1f2937;
 }
 
 .dashboard-tab.active {
   color: #4a6cf7;
   border-bottom-color: #4a6cf7;
   background: #f5f8ff;
+}
+
+body.dark .dashboard-tab.active,
+.dark .dashboard-tab.active {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+  background: #1f2937;
 }
 
 .dashboard-tab svg {
@@ -820,9 +990,21 @@ p {
   transition: all 0.3s;
 }
 
+body.dark .dashboard-card,
+.dark .dashboard-card {
+  background-color: #1f2937;
+  border-color: #374151;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .dashboard-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+}
+
+body.dark .dashboard-card:hover,
+.dark .dashboard-card:hover {
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
 }
 
 .dashboard-card h2 {
@@ -833,6 +1015,12 @@ p {
   padding-bottom: 0.8rem;
   display: flex;
   align-items: center;
+}
+
+body.dark .dashboard-card h2,
+.dark .dashboard-card h2 {
+  color: #e5e7eb;
+  border-bottom-color: #374151;
 }
 
 .dashboard-card h2 svg {
@@ -996,8 +1184,18 @@ p {
   color: #495057;
 }
 
+body.dark .info-label,
+.dark .info-label {
+  color: #9ca3af;
+}
+
 .info-value {
   color: #2c3e50;
+}
+
+body.dark .info-value,
+.dark .info-value {
+  color: #e5e7eb;
 }
 
 .skills-container {
@@ -1093,6 +1291,11 @@ p {
   color: #495057;
 }
 
+body.dark .edit-form label,
+.dark .edit-form label {
+  color: #d1d5db;
+}
+
 .edit-form input,
 .edit-form textarea {
   width: 100%;
@@ -1101,7 +1304,18 @@ p {
   border-radius: 8px;
   font-size: 0.95rem;
   background-color: white;
+  color: #2c3e50;
   transition: all 0.3s;
+}
+
+/* CRITICAL: Dark mode input text visibility fix */
+body.dark .edit-form input,
+body.dark .edit-form textarea,
+.dark .edit-form input,
+.dark .edit-form textarea {
+  background-color: #111827;
+  border-color: #374151;
+  color: #e5e7eb !important; /* Force white text */
 }
 
 .edit-form input:focus,
@@ -1109,6 +1323,14 @@ p {
   border-color: #4a6cf7;
   box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
   outline: none;
+}
+
+body.dark .edit-form input:focus,
+body.dark .edit-form textarea:focus,
+.dark .edit-form input:focus,
+.dark .edit-form textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
 .edit-form textarea {
@@ -1318,6 +1540,14 @@ p {
   background-image: linear-gradient(to bottom right, #ffffff, #f5f9ff);
 }
 
+/* Force light mode for PDF preview - no dark mode */
+body.dark .portfolio-pdf-container,
+.dark .portfolio-pdf-container {
+  background: white !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+  background-image: linear-gradient(to bottom right, #ffffff, #f5f9ff) !important;
+}
+
 .portfolio-content {
   margin: 2rem 0;
   padding: 2rem;
@@ -1328,11 +1558,55 @@ p {
   font-family: var(--font-family);
 }
 
+/* Force light mode for PDF content - no dark mode */
+body.dark .portfolio-content,
+.dark .portfolio-content {
+  background-color: white !important;
+  border-color: #eaeaea !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Force all text in portfolio content to be dark colored */
+body.dark .portfolio-content *,
+.dark .portfolio-content * {
+  color: inherit !important;
+}
+
+body.dark .portfolio-content h1,
+body.dark .portfolio-content h2,
+body.dark .portfolio-content h3,
+body.dark .portfolio-content h4,
+body.dark .portfolio-content h5,
+body.dark .portfolio-content h6,
+.dark .portfolio-content h1,
+.dark .portfolio-content h2,
+.dark .portfolio-content h3,
+.dark .portfolio-content h4,
+.dark .portfolio-content h5,
+.dark .portfolio-content h6 {
+  color: #2c3e50 !important;
+}
+
+body.dark .portfolio-content p,
+body.dark .portfolio-content span,
+body.dark .portfolio-content div,
+.dark .portfolio-content p,
+.dark .portfolio-content span,
+.dark .portfolio-content div {
+  color: #333 !important;
+}
+
 .portfolio-header {
   text-align: center;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 2px solid var(--accent-color);
+}
+
+/* Force light mode for PDF - no dark mode */
+body.dark .portfolio-header,
+.dark .portfolio-header {
+  border-bottom-color: var(--accent-color) !important;
 }
 
 .portfolio-name {
@@ -1343,10 +1617,22 @@ p {
   font-family: var(--font-family);
 }
 
+/* Force light mode for PDF - no dark mode */
+body.dark .portfolio-name,
+.dark .portfolio-name {
+  color: #2c3e50 !important;
+}
+
 .portfolio-title {
   font-size: 1.2rem;
   color: #666;
   margin-bottom: 1rem;
+}
+
+/* Force light mode for PDF - no dark mode */
+body.dark .portfolio-title,
+.dark .portfolio-title {
+  color: #666 !important;
 }
 
 .portfolio-contact {
@@ -1356,6 +1642,12 @@ p {
   margin-top: 1rem;
   font-size: 0.9rem;
   color: #555;
+}
+
+/* Force light mode for PDF - no dark mode */
+body.dark .portfolio-contact,
+.dark .portfolio-contact {
+  color: #555 !important;
 }
 
 .contact-item {
@@ -1368,12 +1660,24 @@ p {
   color: var(--accent-color);
 }
 
+/* Force light mode for PDF - no dark mode */
+body.dark .contact-item svg,
+.dark .contact-item svg {
+  color: #2563eb !important;
+}
+
 .portfolio-section {
   margin-bottom: 1.5rem;
   background-color: #edf2fa;
   padding: 1.5rem;
   border-radius: 10px;
   font-family: var(--font-family);
+}
+
+/* Force light mode for PDF - no dark mode */
+body.dark .portfolio-section,
+.dark .portfolio-section {
+  background-color: #edf2fa !important;
 }
 
 .portfolio-section h2 {
@@ -1383,6 +1687,13 @@ p {
   border-bottom: 1px solid #ddd;
   padding-bottom: 0.5rem;
   font-family: var(--font-family);
+}
+
+/* Force light mode for PDF - no dark mode */
+body.dark .portfolio-section h2,
+.dark .portfolio-section h2 {
+  color: #2563eb !important;
+  border-bottom-color: #ddd !important;
 }
 
 .pdf-skills-list {
@@ -1402,10 +1713,23 @@ p {
   font-family: var(--font-family);
 }
 
+/* Force light mode for PDF - no dark mode */
+body.dark .pdf-skill-item,
+.dark .pdf-skill-item {
+  background-color: #d6e4ff !important;
+  color: #495057 !important;
+}
+
 .pdf-project-item {
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px dashed #eee;
+}
+
+/* Force light mode for PDF - no dark mode */
+body.dark .pdf-project-item,
+.dark .pdf-project-item {
+  border-bottom-color: #eee !important;
 }
 
 .pdf-project-item:last-child {
@@ -1421,11 +1745,23 @@ p {
   font-family: var(--font-family);
 }
 
+/* Force light mode for PDF - no dark mode */
+body.dark .pdf-project-title,
+.dark .pdf-project-title {
+  color: #2563eb !important;
+}
+
 .pdf-project-tech {
   font-size: 0.9rem;
   color: #666;
   margin-bottom: 0.5rem;
   font-style: italic;
+}
+
+/* Force light mode for PDF - no dark mode */
+body.dark .pdf-project-tech,
+.dark .pdf-project-tech {
+  color: #666 !important;
 }
 
 .pdf-project-desc {
@@ -1435,10 +1771,22 @@ p {
   line-height: 1.5;
 }
 
+/* Force light mode for PDF - no dark mode */
+body.dark .pdf-project-desc,
+.dark .pdf-project-desc {
+  color: #333 !important;
+}
+
 .pdf-project-link {
   font-size: 0.9rem;
   color: var(--accent-color);
   text-decoration: none;
+}
+
+/* Force light mode for PDF - no dark mode */
+body.dark .pdf-project-link,
+.dark .pdf-project-link {
+  color: #2563eb !important;
 }
 
 .pdf-project-link:hover {
@@ -2331,3 +2679,406 @@ p {
     print-color-adjust: exact;
   }
 }
+
+/* ============================================
+   ATS Mode Controls & Info Boxes
+   ============================================ */
+
+.ats-controls {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ats-toggle-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .ats-toggle-container {
+  background: #1f2937;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.ats-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ats-toggle-input {
+  display: none;
+}
+
+.ats-toggle-switch {
+  position: relative;
+  width: 56px;
+  height: 28px;
+  background: #cbd5e1;
+  border-radius: 28px;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.ats-toggle-input:checked + .ats-toggle-switch {
+  background: #10b981;
+}
+
+.ats-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ats-toggle-input:checked + .ats-toggle-switch::after {
+  transform: translateX(28px);
+}
+
+.ats-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ats-toggle-text strong {
+  font-size: 1.1rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+body.dark .ats-toggle-text strong {
+  color: #e5e7eb;
+}
+
+.ats-toggle-text small {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+body.dark .ats-toggle-text small {
+  color: #9ca3af;
+}
+
+.ats-info-box {
+  background: #ecfdf5;
+  border: 2px solid #10b981;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  animation: slideDown 0.3s ease;
+}
+
+body.dark .ats-info-box {
+  background: #064e3b;
+  border-color: #059669;
+}
+
+.ats-info-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.ats-info-icon.success {
+  color: #10b981;
+}
+
+body.dark .ats-info-icon.success {
+  color: #34d399;
+}
+
+.ats-info-content strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #065f46;
+  margin-bottom: 0.5rem;
+}
+
+body.dark .ats-info-content strong {
+  color: #d1fae5;
+}
+
+.ats-info-content p {
+  color: #047857;
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+body.dark .ats-info-content p {
+  color: #a7f3d0;
+}
+
+.ats-info-content ul {
+  margin: 0.5rem 0 0 1.25rem;
+  padding: 0;
+  list-style: disc;
+}
+
+.ats-info-content ul li {
+  color: #047857;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+body.dark .ats-info-content ul li {
+  color: #a7f3d0;
+}
+
+.ats-warnings-box {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  animation: slideDown 0.3s ease;
+}
+
+body.dark .ats-warnings-box {
+  background: #78350f;
+  border-color: #d97706;
+}
+
+.ats-warning-icon {
+  font-size: 1.5rem;
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+body.dark .ats-warning-icon {
+  color: #fbbf24;
+}
+
+.ats-warnings-content strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+}
+
+body.dark .ats-warnings-content strong {
+  color: #fef3c7;
+}
+
+.ats-warnings-content ul {
+  margin: 0.5rem 0 0 1.25rem;
+  padding: 0;
+  list-style: disc;
+}
+
+.ats-warnings-content ul li {
+  color: #b45309;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+body.dark .ats-warnings-content ul li {
+  color: #fcd34d;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   ATS Template Styles (ATS-Compliant)
+   ============================================ */
+
+.ats-template {
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 0.4in;
+  background: #ffffff !important;
+  font-family: Arial, sans-serif !important;
+  color: #000000 !important;
+  line-height: 1.5;
+}
+
+.ats-template * {
+  color: #000000 !important;
+  font-family: Arial, sans-serif !important;
+}
+
+.ats-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 0.75rem;
+}
+
+.ats-name {
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 0.5rem 0;
+  color: #000000 !important;
+}
+
+.ats-contact {
+  font-size: 11px;
+  margin: 0;
+  color: #000000 !important;
+}
+
+.ats-section {
+  margin-bottom: 1.25rem;
+}
+
+.ats-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #000000;
+  color: #000000 !important;
+}
+
+.ats-text {
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+  color: #000000 !important;
+}
+
+.ats-skills {
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+  color: #000000 !important;
+}
+
+.ats-project {
+  margin-bottom: 1rem;
+}
+
+.ats-project-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: #000000 !important;
+}
+
+.ats-project-tech {
+  font-size: 10px;
+  font-style: italic;
+  margin: 0 0 0.25rem 0;
+  color: #333333 !important;
+}
+
+.ats-project-desc {
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 0.25rem 0;
+  color: #000000 !important;
+}
+
+.ats-project-link {
+  font-size: 10px;
+  color: #000000 !important;
+  text-decoration: none;
+}
+
+.ats-education-item {
+  margin-bottom: 0.75rem;
+}
+
+.ats-education-degree {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+  color: #000000 !important;
+}
+
+.ats-education-college {
+  font-size: 11px;
+  margin: 0.15rem 0;
+  color: #000000 !important;
+}
+
+.ats-education-details {
+  font-size: 10px;
+  color: #333333 !important;
+  margin: 0.15rem 0;
+}
+
+/* Force light mode for ATS content in PDF */
+.portfolio-content.ats-mode,
+.portfolio-content.ats-mode *,
+.portfolio-content.ats-mode .ats-template,
+.portfolio-content.ats-mode .ats-template * {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* ============================================
+   Template Selector Styles
+   ============================================ */
+
+.template-selector-container {
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+body.dark .template-selector-container,
+.dark .template-selector-container {
+  background: #1f2937;
+}
+
+.template-preview-mini {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.template-card {
+  background: white;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+body.dark .template-card,
+.dark .template-card {
+  background: #1f2937;
+}
+
+.template-tab-content {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+body.dark .template-tab-content,
+.dark .template-tab-content {
+  background: #1f2937;
+}
+
