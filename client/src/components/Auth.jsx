@@ -7,8 +7,8 @@ import {
 } from 'react-icons/fa';
 
 // Public OAuth client ID (safe to expose — it is not a secret).
-// Stored server-side in server/.env, loaded dynamically, or fallback to REACT_APP_GOOGLE_CLIENT_ID.
-const ENV_GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
+// Stored server-side in server/.env, injected in HTML, loaded dynamically, or fallback to REACT_APP_GOOGLE_CLIENT_ID.
+const ENV_GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || (typeof window !== 'undefined' && window.__GOOGLE_CLIENT_ID__) || '';
 const GIS_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
 
 // Load Google Identity Services once per page load.
@@ -22,8 +22,15 @@ function loadGisScript() {
     gisLoadPromise = new Promise((resolve) => {
       const existing = document.querySelector(`script[src="${GIS_SCRIPT_SRC}"]`);
       if (existing) {
+        if (window.google?.accounts?.id) {
+          resolve(true);
+          return;
+        }
         existing.addEventListener('load', () => resolve(true), { once: true });
-        existing.addEventListener('error', () => resolve(false), { once: true });
+        existing.addEventListener('error', () => {
+          gisLoadPromise = null;
+          resolve(false);
+        }, { once: true });
         return;
       }
       const script = document.createElement('script');
@@ -31,7 +38,10 @@ function loadGisScript() {
       script.async = true;
       script.defer = true;
       script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
+      script.onerror = () => {
+        gisLoadPromise = null;
+        resolve(false);
+      };
       document.head.appendChild(script);
     });
   }
@@ -58,6 +68,7 @@ const Auth = ({ onAuthSuccess }) => {
   const [googleReady, setGoogleReady] = useState(false);
   const [googleLoadFailed, setGoogleLoadFailed] = useState(false);
   const googleBtnRef = useRef(null);
+  const initializedClientIdRef = useRef(null);
   const googleConfigured = Boolean(googleClientId);
 
   useEffect(() => {
@@ -176,6 +187,38 @@ const Auth = ({ onAuthSuccess }) => {
     }
   }, [onAuthSuccess]);
 
+  // Render Google button with defensive initialization guarding
+  const renderGoogleButton = useCallback(() => {
+    if (!googleClientId || !window.google?.accounts?.id) return;
+    try {
+      if (initializedClientIdRef.current !== googleClientId) {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleCredential,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+        initializedClientIdRef.current = googleClientId;
+      }
+      const target = googleBtnRef.current;
+      if (target) {
+        target.innerHTML = '';
+        const width = Math.max(240, Math.min(400, target.clientWidth || 320));
+        window.google.accounts.id.renderButton(target, {
+          theme: 'outline',
+          size: 'large',
+          width,
+          text: 'continue_with',
+          shape: 'rectangular',
+        });
+      }
+      setGoogleReady(true);
+    } catch (e) {
+      console.error('Error rendering Google button:', e);
+      setGoogleLoadFailed(true);
+    }
+  }, [googleClientId, handleGoogleCredential]);
+
   // Initialise the official Google button (login + signup share it).
   useEffect(() => {
     if (!googleConfigured || !googleClientId) return;
@@ -187,31 +230,10 @@ const Auth = ({ onAuthSuccess }) => {
         setGoogleLoadFailed(true);
         return;
       }
-      try {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleGoogleCredential,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        });
-        const target = googleBtnRef.current;
-        if (target) {
-          target.innerHTML = '';
-          window.google.accounts.id.renderButton(target, {
-            theme: 'outline',
-            size: 'large',
-            width: Math.max(240, Math.min(400, target.clientWidth || 320)),
-            text: 'continue_with',
-            shape: 'rectangular',
-          });
-        }
-        setGoogleReady(true);
-      } catch (e) {
-        setGoogleLoadFailed(true);
-      }
+      renderGoogleButton();
     });
     return () => { cancelled = true; };
-  }, [googleConfigured, googleClientId, handleGoogleCredential, isLogin]);
+  }, [googleConfigured, googleClientId, renderGoogleButton]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -413,17 +435,13 @@ const Auth = ({ onAuthSuccess }) => {
                 onClick={() => {
                   setGoogleLoadFailed(false);
                   setGoogleReady(false);
+                  gisLoadPromise = null;
                   loadGisScript().then((ok) => {
-                    if (!ok) { setGoogleLoadFailed(true); return; }
-                    try {
-                      window.google.accounts.id.initialize({ client_id: googleClientId, callback: handleGoogleCredential });
-                      const target = googleBtnRef.current;
-                      if (target) {
-                        target.innerHTML = '';
-                        window.google.accounts.id.renderButton(target, { theme: 'outline', size: 'large', text: 'continue_with' });
-                      }
-                      setGoogleReady(true);
-                    } catch { setGoogleLoadFailed(true); }
+                    if (!ok || !window.google?.accounts?.id) {
+                      setGoogleLoadFailed(true);
+                      return;
+                    }
+                    renderGoogleButton();
                   });
                 }}
               >

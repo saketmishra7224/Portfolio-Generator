@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
@@ -30,9 +31,17 @@ app.set('trust proxy', 1);
 // Set mongoose strictQuery option to suppress deprecation warning
 mongoose.set('strictQuery', false);
 
-// Security headers (helmet defaults; contentSecurityPolicy disabled because
-// the served CRA bundle uses inline scripts/styles).
-app.use(helmet({ contentSecurityPolicy: false }));
+// Security headers:
+// - contentSecurityPolicy disabled because the served CRA bundle uses inline scripts/styles.
+// - crossOriginOpenerPolicy: 'same-origin-allow-popups' enables Google Identity Services popup/iframe postMessage communication.
+// - crossOriginResourcePolicy: false prevents blocking Google Identity Services assets.
+// - referrerPolicy: 'strict-origin-when-cross-origin' allows Google's gsi servers to verify authorized JavaScript origins.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  crossOriginResourcePolicy: false,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
 
 // CORS: same-origin needs no CORS headers. Cross-origin is only allowed for
 // explicitly configured origins (comma-separated CORS_ORIGIN). Production
@@ -131,10 +140,24 @@ app.use('/api/resumes', resumeRoutes);
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  app.use(express.static(path.join(__dirname, '../client/build'), { index: false }));
   
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
+    const indexPath = path.resolve(__dirname, '../client/build', 'index.html');
+    const clientId = process.env.GOOGLE_CLIENT_ID || '';
+    if (clientId && fs.existsSync(indexPath)) {
+      try {
+        let html = fs.readFileSync(indexPath, 'utf8');
+        html = html.replace(
+          '</head>',
+          `<script>window.__GOOGLE_CLIENT_ID__=${JSON.stringify(clientId)};</script></head>`
+        );
+        return res.send(html);
+      } catch (e) {
+        return res.sendFile(indexPath);
+      }
+    }
+    res.sendFile(indexPath);
   });
 }
 
