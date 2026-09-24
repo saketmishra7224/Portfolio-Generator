@@ -40,12 +40,16 @@ git push origin main
 
 Add these in Render dashboard under "Environment":
 
-| Key | Value |
-|-----|-------|
+| Key | Value / Notes |
+|-----|---------------|
 | `NODE_ENV` | `production` |
-| `MONGODB_URI` | `mongodb+srv://portfoliouser:Portfolio2024!@cluster0.2nbgioe.mongodb.net/portfolio-generator?retryWrites=true&w=majority` |
-| `JWT_SECRET` | `cc97b758758f231420d6214779d2cfefd17f167de2b3dc62960b6f58624dea06` |
-| `PORT` | `10000` (or leave empty, Render sets it automatically) |
+| `MONGODB_URI` | Your MongoDB Atlas connection string |
+| `JWT_SECRET` | Secure 64-char hex key for session signing |
+| `GOOGLE_CLIENT_ID` | `538656790046-qetnoqfduqc31vip4qqvkcaevhqqgibr.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | Your Google OAuth client secret from Google Cloud Console |
+| `PORT` | `10000` (or leave empty, Render sets this automatically) |
+
+> **Important**: In Google Cloud Console (APIs & Services → Credentials → OAuth 2.0 Client ID), add your Render URL (e.g. `https://your-app-name.onrender.com`) to **Authorized JavaScript origins** so Google Sign-In works on production.
 
 ### Step 4: Deploy
 

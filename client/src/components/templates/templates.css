@@ -1,0 +1,137 @@
+/* ==========================================================================
+   Resume template skins — 5 distinct design languages over one shared
+   markup (templates/shared/ResumeBlocks.jsx). Visual templates are optimized
+   for PRESENTATION (exported via raster PDF); the ATS skin is optimized for
+   PARSING (plain on-screen preview + separate selectable-text PDF export).
+   Accent + font come from theme CSS vars set by ThemeCustomizer.
+   ========================================================================== */
+
+.rt {
+  --rt-accent: var(--accent-color, #2563eb);
+  --rt-font: var(--font-family, Inter, sans-serif);
+  max-width: 820px;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #111827;
+  font-family: var(--rt-font);
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+}
+.rt a { color: var(--rt-accent); text-decoration: none; }
+.rt a:hover { text-decoration: underline; }
+.rt-header { margin-bottom: 8px; }
+.rt-name { margin: 0 0 2px; color: #111827; }
+.rt-headline { margin: 0 0 6px; color: #374151; font-weight: 600; }
+.rt-contact { margin: 2px 0; font-size: 0.86rem; color: #4b5563; }
+.rt-section { margin-top: 22px; }
+.rt-section-title { margin: 0 0 10px; color: #111827; }
+.rt-entry { margin-bottom: 14px; }
+.rt-entry:last-child { margin-bottom: 0; }
+.rt-entry-title { margin: 0; font-size: 0.98rem; color: #111827; }
+.rt-entry-meta { margin: 1px 0 4px; font-size: 0.83rem; color: #6b7280; }
+.rt-entry-desc { margin: 4px 0; }
+.rt-bullets { margin: 4px 0 4px 20px; padding: 0; }
+.rt-bullet { margin-bottom: 2px; }
+.rt-entry-extra, .rt-entry-links { font-size: 0.85rem; color: #4b5563; margin: 3px 0 0; }
+.rt-skill-group { margin-bottom: 8px; }
+.rt-skill-group-label { font-size: 0.82rem; font-weight: 700; color: #374151; margin: 0 0 3px; }
+.rt-skills-inline { margin: 0 0 4px; }
+.rt-skills-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+.rt-skill-chip { font-size: 0.78rem; padding: 2px 10px; border-radius: 999px; }
+.rt-line { margin: 3px 0; }
+.rt-para { margin: 0 0 8px; }
+
+/* ---------------- MINIMAL: whitespace, elegant type, simple hierarchy --- */
+.rt-minimal { padding: 48px 52px; }
+.rt-minimal .rt-header { text-align: center; margin-bottom: 18px; }
+.rt-minimal .rt-name { font-family: Georgia, 'Times New Roman', serif; font-size: 2rem; font-weight: 400; letter-spacing: 0.01em; }
+.rt-minimal .rt-headline { font-weight: 400; font-style: italic; color: #4b5563; }
+.rt-minimal .rt-contact { font-size: 0.82rem; }
+.rt-minimal .rt-section { margin-top: 30px; }
+.rt-minimal .rt-section-title {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;
+}
+.rt-minimal .rt-entry-title { font-family: Georgia, serif; font-weight: 700; }
+.rt-minimal .rt-skill-chip { border: 1px solid #d1d5db; color: #374151; background: transparent; }
+.rt-minimal .rt-bullets { list-style: circle; }
+
+/* ---------------- MODERN: contemporary, subtle accent, strong hierarchy - */
+.rt-modern { padding: 0; overflow: hidden; }
+.rt-modern .rt-header { background: #f1f5ff; border-left: 6px solid var(--rt-accent); padding: 26px 30px 20px; margin-bottom: 0; }
+.rt-modern .rt-avatar {
+  width: 56px; height: 56px; border-radius: 50%; background: var(--rt-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;
+}
+.rt-modern .rt-name { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; color: var(--rt-accent); }
+.rt-modern .rt-headline { color: #1f2937; }
+.rt-modern .rt-contact { color: #4b5563; }
+.rt-modern .rt-section { padding: 0 30px; margin-top: 22px; }
+.rt-modern .rt-section-title {
+  font-size: 0.95rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+  color: #111827; border-bottom: 3px solid var(--rt-accent); display: inline-block;
+  padding-bottom: 3px; margin-bottom: 12px;
+}
+.rt-modern .rt-entry-title { color: #111827; }
+.rt-modern .rt-skill-chip { background: #e8efff; color: #1e40af; font-weight: 600; border: none; }
+.rt-modern .rt-skills-inline { display: none; }
+.rt-modern .rt-bullets { list-style: disc; }
+.rt-modern .rt-bullets .rt-bullet::marker { color: var(--rt-accent); }
+
+/* ---------------- CLASSIC: traditional, conservative, formal ------------ */
+.rt-classic { padding: 40px 48px; font-family: 'Times New Roman', Times, Georgia, serif; }
+.rt-classic .rt-header { text-align: center; border-top: 3px double #111827; border-bottom: 3px double #111827; padding: 14px 0; margin-bottom: 6px; }
+.rt-classic .rt-name { font-size: 1.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.rt-classic .rt-headline { font-style: italic; }
+.rt-classic .rt-contact { font-size: 0.85rem; }
+.rt-classic .rt-section { margin-top: 18px; }
+.rt-classic .rt-section-title {
+  font-size: 1rem; font-variant: small-caps; letter-spacing: 0.12em;
+  border-bottom: 1px solid #111827; padding-bottom: 3px;
+}
+.rt-classic .rt-entry-title { font-size: 1rem; }
+.rt-classic .rt-entry-meta { font-style: italic; }
+.rt-classic .rt-skill-chip { border: 1px solid #6b7280; border-radius: 0; color: #111827; background: transparent; font-family: inherit; }
+.rt-classic .rt-skills-inline { display: none; }
+.rt-classic .rt-bullets { list-style: square; }
+
+/* ------------- PROFESSIONAL: corporate density, polished headers --------- */
+.rt-professional { padding: 30px 36px; font-size: 13.5px; }
+.rt-professional .rt-header { border-bottom: 4px solid #0f172a; padding-bottom: 12px; margin-bottom: 4px; }
+.rt-professional .rt-name { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.01em; text-transform: uppercase; }
+.rt-professional .rt-headline { color: var(--rt-accent); font-weight: 700; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.1em; }
+.rt-professional .rt-contact { font-size: 0.8rem; color: #475569; }
+.rt-professional .rt-section { margin-top: 18px; }
+.rt-professional .rt-section-title {
+  font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em;
+  color: #0f172a; border-bottom: 2px solid #cbd5e1; padding-bottom: 4px;
+  padding-left: 10px; position: relative;
+}
+.rt-professional .rt-section-title::before {
+  content: ''; position: absolute; left: 0; top: 2px; bottom: 6px; width: 4px;
+  background: var(--rt-accent);
+}
+.rt-professional .rt-entry { margin-bottom: 10px; }
+.rt-professional .rt-entry-title { font-size: 0.92rem; }
+.rt-professional .rt-entry-meta { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.rt-professional .rt-skill-chip { background: #0f172a; color: #fff; border-radius: 4px; font-weight: 600; }
+.rt-professional .rt-skills-inline { display: none; }
+.rt-professional .rt-bullets { list-style: disc; margin-left: 18px; }
+
+/* ---------------- ATS on-screen preview helpers -------------------------- */
+.ats-template ul.ats-bullets { list-style: disc; margin: 4px 0 4px 20px; padding: 0; }
+.ats-template .ats-bullets .ats-text { margin: 2px 0; }
+
+/* ---------------- Compare card mini mock --------------------------------- */
+.tpl-compare { display: grid; gap: 12px; }
+@media (min-width: 720px) { .tpl-compare { grid-template-columns: 1fr 1fr; } }
+.tpl-mock { border: 1px solid var(--ds-border); border-radius: 10px; overflow: hidden; background: #fff; }
+.tpl-mock-visual .tpl-mock-head { background: #eef2ff; border-left: 5px solid var(--ds-primary); padding: 10px 12px; }
+.tpl-mock-ats .tpl-mock-head { border-bottom: 2px solid #0f172a; padding: 10px 12px; }
+.tpl-mock-body { padding: 10px 12px; display: grid; gap: 6px; }
+.tpl-mock-line { height: 7px; border-radius: 4px; background: #e2e8f0; }
+.tpl-mock-chiprow { display: flex; gap: 5px; }
+.tpl-mock-chip { height: 14px; min-width: 44px; border-radius: 999px; background: #e0e9ff; border: 1px solid #c7d2fe; }
+.tpl-mock-ats .tpl-mock-chip { border-radius: 2px; background: #f1f5f9; border-color: #e2e8f0; }

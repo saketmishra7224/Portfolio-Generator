@@ -1,41 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import LandingPage from './components/LandingPage';
 import NavBar from './components/NavBar';
 import Auth from './components/Auth';
-import EnhancedProfileSetup from './components/EnhancedProfileSetup';
-import ProfilePreview from './components/ProfilePreview';
-import Success from './components/Success';
-import Dashboard from './components/Dashboard';
-import PortfolioPDF from './components/PortfolioPDF';
-import PortfolioWizard from './components/PortfolioWizard';
-import { authService, profileService } from './services/api';
+// Heavy routes are code-split so the landing/auth first paint stays lean.
+// (The legacy wizard components are no longer part of any route.)
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const PortfolioPDF = lazy(() => import('./components/PortfolioPDF'));
+const ResumeBuilder = lazy(() => import('./components/ResumeBuilder'));
+const JobMatch = lazy(() => import('./components/JobMatch'));
+
+function RouteLoader() {
+  return (
+    <div className="ds-page" role="status" aria-label="Loading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto mb-4" aria-hidden="true" />
+        <p className="ds-muted">Loading…</p>
+      </div>
+    </div>
+  );
+}
+import { authService, profileService, resumesService } from './services/api';
 import { ThemeProvider } from './context/ThemeContext';
+import { normalizeProfile, EMPTY_NEW_SECTIONS, EMPTY_PERSONAL_EXT } from './utils/resumeModel';
 import './index.css';
 import './styles.css';
 
+const INITIAL_FORM_DATA = {
+  personalInfo: {
+    name: '',
+    email: '',
+    phone: '',
+    profileImage: null,
+    bio: '',
+    tagline: '',
+    ...EMPTY_PERSONAL_EXT
+  },
+  education: {
+    college: '',
+    degree: '',
+    specialization: '',
+    cgpa: '',
+    summary: ''
+  },
+  skills: [],
+  projects: [],
+  socialLinks: {
+    github: ''
+  },
+  ...EMPTY_NEW_SECTIONS
+};
+
 function App() {
-  const [formData, setFormData] = useState({
-    personalInfo: {
-      name: '',
-      email: '',
-      phone: '',
-      profileImage: null,
-      bio: '',
-      tagline: ''
-    },
-    education: {
-      college: '',
-      degree: '',
-      specialization: '',
-      cgpa: '',
-      summary: ''
-    },
-    skills: [],
-    projects: [],
-    socialLinks: {
-      github: ''
-    }
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [currentRoute, setCurrentRoute] = useState('landing');
   const [wizardStep, setWizardStep] = useState(1);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -43,6 +59,37 @@ function App() {
   const [error, setError] = useState(null);
   const [apiStatus, setApiStatus] = useState('Checking connection...');
   const [darkMode, setDarkMode] = useState(false);
+  // Active resume version ({ id, name }) or null for the main resume.
+  // Legacy users never set this and keep working on the User document.
+  const [activeVersion, setActiveVersion] = useState(null);
+
+  // Version-aware save: routes writes to the active version snapshot when
+  // one is selected, otherwise to the main profile. Same payload shape.
+  const saveProfile = async (payload) => {
+    if (activeVersion && activeVersion.id) {
+      return resumesService.update(activeVersion.id, payload);
+    }
+    return profileService.updateProfile(payload);
+  };
+
+  const handleActivateVersion = (version) => {
+    if (!version) return;
+    setFormData(normalizeProfile(version.data || {}));
+    setActiveVersion({ id: String(version.id), name: version.name });
+  };
+
+  const handleDeactivateVersion = async () => {
+    try {
+      const response = await profileService.getProfile();
+      if (response.success && response.data.profile) {
+        setFormData(normalizeProfile(response.data.profile));
+      }
+    } catch (err) {
+      console.error('Error reloading main profile:', err);
+    } finally {
+      setActiveVersion(null);
+    }
+  };
 
   // Initialize dark mode from localStorage
   useEffect(() => {
@@ -75,7 +122,7 @@ function App() {
       ? 'http://localhost:5000/api' 
       : '/api';
     
-    fetch(`${baseUrl}/test`)
+    fetch(`${baseUrl}/db-status`)
       .then(response => {
         if (response.ok) {
           return response.json();
@@ -104,20 +151,33 @@ function App() {
       try {
         // Verify token and get user data from API
         const response = await authService.getCurrentUser();
-        
+
         if (response.success && response.data.user) {
-          // Get full profile data including profile image
-          setFormData({
-            personalInfo: {
-              ...formData.personalInfo,
-              ...response.data.user.personalInfo
-            },
-            education: response.data.user.education || formData.education,
-            skills: response.data.user.skills || formData.skills,
-            projects: response.data.user.projects || formData.projects,
-            socialLinks: response.data.user.socialLinks || formData.socialLinks
-          });
-          
+          // Normalize through the resume model so old-schema users gain the
+          // new sections with safe defaults (no data loss, no forced fields).
+          setFormData((prev) => ({
+            ...normalizeProfile(response.data.user),
+            personalInfo: { ...prev.personalInfo, ...(response.data.user.personalInfo || {}) },
+          }));
+
+          // Restore an active resume version, if the user had one selected.
+          // Failure heals locally (and server-side): a deleted version simply
+          // drops back to the main resume.
+          const activeId = response.data.user.activeResumeVersion;
+          if (activeId) {
+            try {
+              const vRes = await resumesService.get(activeId);
+              if (vRes.success && vRes.data.version) {
+                setFormData(normalizeProfile(vRes.data.version.data || {}));
+                setActiveVersion({ id: String(vRes.data.version.id), name: vRes.data.version.name });
+              }
+            } catch (versionErr) {
+              console.warn('Active version unavailable, using main resume:', versionErr.message);
+              try { await resumesService.setActive(null); } catch { /* ignore */ }
+              setActiveVersion(null);
+            }
+          }
+
           setIsAuthenticated(true);
           
           // If user has completed profile, go to dashboard
@@ -147,20 +207,13 @@ function App() {
   }, []);
 
   const handleAuthSuccess = (userData) => {
-    console.log("Auth success with user data:", userData);
-    
+
     // If user data contains profile info, populate form including profile image
     if (userData) {
-      setFormData({
-        personalInfo: {
-          ...formData.personalInfo,
-          ...userData.personalInfo
-        },
-        education: userData.education || formData.education,
-        skills: userData.skills || formData.skills,
-        projects: userData.projects || formData.projects,
-        socialLinks: userData.socialLinks || formData.socialLinks
-      });
+      setFormData((prev) => ({
+        ...normalizeProfile(userData),
+        personalInfo: { ...prev.personalInfo, ...(userData.personalInfo || {}) },
+      }));
       
       // If user already has a complete profile, go to dashboard
       const hasCompletedProfile = 
@@ -182,31 +235,11 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('currentUserEmail');
+    setActiveVersion(null);
     setIsAuthenticated(false);
     setCurrentRoute('landing');
     setWizardStep(1);
-    setFormData({
-      personalInfo: {
-        name: '',
-        email: '',
-        phone: '',
-        profileImage: null,
-        bio: '',
-        tagline: ''
-      },
-      education: {
-        college: '',
-        degree: '',
-        specialization: '',
-        cgpa: '',
-        summary: ''
-      },
-      skills: [],
-      projects: [],
-      socialLinks: {
-        github: ''
-      }
-    });
+    setFormData({ ...INITIAL_FORM_DATA });
   };
 
   const handleNavigation = (route) => {
@@ -221,12 +254,10 @@ function App() {
   };
 
   const updateFormData = (newData) => {
-    console.log("Updating form data:", newData);
     setFormData(newData);
   };
 
   const nextStep = (data) => {
-    console.log("Moving to next step with data:", data);
     const updatedData = {
       ...formData,
       ...data
@@ -275,61 +306,31 @@ function App() {
             onLogout={handleLogout}
             updateFormData={updateFormData}
             onViewPortfolio={() => setCurrentRoute('preview')}
+            onNavigate={handleNavigation}
+            saveProfile={saveProfile}
+            activeVersion={activeVersion}
+            onActivateVersion={handleActivateVersion}
+            onDeactivateVersion={handleDeactivateVersion}
+            darkMode={darkMode}
+            toggleDarkMode={toggleDarkMode}
           />
         );
       
       case 'create':
-        const stepTitles = ['Personal Info', 'Education', 'Skills & Projects', 'Review'];
+        // Professional Resume Builder: sidebar sections + editor + live
+        // preview. Same profile data and APIs as the portfolio flow, so
+        // existing portfolios keep working unchanged.
         return (
-          <PortfolioWizard
-            currentStep={wizardStep}
-            totalSteps={4}
-            stepTitles={stepTitles}
-            onNext={() => {
-              if (wizardStep === 4) {
-                setCurrentRoute('dashboard');
-              } else {
-                setWizardStep(wizardStep + 1);
-              }
+          <ResumeBuilder
+            formData={formData}
+            onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))}
+            onSave={async (payload) => {
+              await saveProfile(payload);
+              setFormData((prev) => ({ ...prev, ...payload }));
             }}
-            onPrev={prevStep}
-            onSave={handleSaveProgress}
-          >
-            {wizardStep === 1 && (
-              <EnhancedProfileSetup
-                formData={formData}
-                onNext={nextStep}
-                hideNavigation={true}
-              />
-            )}
-            {wizardStep === 2 && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Education Details</h2>
-                <EnhancedProfileSetup
-                  formData={formData}
-                  onNext={nextStep}
-                  hideNavigation={true}
-                  showOnlyEducation={true}
-                />
-              </div>
-            )}
-            {wizardStep === 3 && (
-              <EnhancedProfileSetup
-                formData={formData}
-                onNext={nextStep}
-                hideNavigation={true}
-                showOnlySkillsProjects={true}
-              />
-            )}
-            {wizardStep === 4 && (
-              <ProfilePreview
-                formData={formData}
-                onBack={prevStep}
-                onConfirm={() => setCurrentRoute('dashboard')}
-                hideNavigation={true}
-              />
-            )}
-          </PortfolioWizard>
+            onExit={() => setCurrentRoute('dashboard')}
+            onPreview={() => setCurrentRoute('preview')}
+          />
         );
       
       case 'preview':
@@ -339,7 +340,23 @@ function App() {
             onBack={() => setCurrentRoute('dashboard')}
           />
         );
-      
+
+      case 'jobmatch':
+        // Job Description Matcher: same profile data and APIs as the rest of
+        // the app. Auth-gated like the other private routes.
+        if (!isAuthenticated) {
+          return <Auth onAuthSuccess={handleAuthSuccess} />;
+        }
+        return (
+          <JobMatch
+            formData={formData}
+            saveProfile={saveProfile}
+            onProfileUpdate={(payload) => setFormData((prev) => ({ ...prev, ...payload }))}
+            onBack={() => setCurrentRoute('dashboard')}
+            onOpenAts={() => setCurrentRoute('dashboard')}
+          />
+        );
+
       case 'help':
         return (
           <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12">
@@ -394,7 +411,9 @@ function App() {
             {error}
           </div>
         )}
-        {renderContent()}
+        <Suspense fallback={<RouteLoader />}>
+          {renderContent()}
+        </Suspense>
       </div>
     </ThemeProvider>
   );

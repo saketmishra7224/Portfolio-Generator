@@ -1,143 +1,88 @@
 import React, { useState } from 'react';
-import { FaBars, FaTimes, FaHome, FaTachometerAlt, FaFileAlt, FaEye, FaQuestionCircle, FaSignOutAlt, FaMoon, FaSun } from 'react-icons/fa';
-import { motion, AnimatePresence } from 'framer-motion';
+import { FaBars, FaTimes, FaHome, FaTachometerAlt, FaFileAlt, FaEye, FaQuestionCircle, FaSignOutAlt, FaMoon, FaSun, FaSearch } from 'react-icons/fa';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const NavBar = ({ isAuthenticated, onLogout, activeRoute = 'home', onNavigate, darkMode, toggleDarkMode }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const navItems = [
     { id: 'home', label: 'Home', icon: <FaHome />, authRequired: false },
     { id: 'dashboard', label: 'Dashboard', icon: <FaTachometerAlt />, authRequired: true },
-    { id: 'create', label: 'Create Portfolio', icon: <FaFileAlt />, authRequired: true },
+    { id: 'create', label: 'Resume Builder', icon: <FaFileAlt />, authRequired: true },
     { id: 'preview', label: 'Preview', icon: <FaEye />, authRequired: true },
+    { id: 'jobmatch', label: 'Job Match', icon: <FaSearch />, authRequired: true },
     { id: 'help', label: 'Help', icon: <FaQuestionCircle />, authRequired: false },
   ];
+  const items = navItems.filter((i) => !i.authRequired || isAuthenticated);
 
-  const filteredNavItems = navItems.filter(item => !item.authRequired || isAuthenticated);
+  const go = (id) => { onNavigate(id); setOpen(false); };
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50 transition-colors duration-300">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div 
-            className="flex items-center space-x-2 cursor-pointer"
-            onClick={() => onNavigate('home')}
-          >
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">P</span>
-            </div>
-            <span className="text-xl font-bold font-heading bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Portfolio Builder
-            </span>
-          </div>
+    <header className="ds-nav" role="banner">
+      <div className="ds-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
+        <button
+          onClick={() => go('home')}
+          aria-label="Go home"
+          style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'transparent', border: 0, cursor: 'pointer', color: 'inherit' }}
+        >
+          <span aria-hidden="true" style={{ width: 32, height: 32, borderRadius: 9, background: '#0f172a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>P</span>
+          <span style={{ fontWeight: 750, letterSpacing: '-0.02em' }}>Portfolio Generator</span>
+        </button>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            {filteredNavItems.map((item) => (
+        <nav aria-label="App" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span className="ds-row" style={{ gap: 2, display: 'none' }} />
+          <span style={{ display: 'flex', gap: 2 }} className="navbar-desktop">
+            {items.map((it) => (
               <button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${
-                  activeRoute === item.id
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
+                key={it.id}
+                onClick={() => go(it.id)}
+                aria-current={activeRoute === it.id || (activeRoute === 'landing' && it.id === 'home') ? 'page' : undefined}
+                className={`ds-btn ds-btn-sm ${activeRoute === it.id || (activeRoute === 'landing' && it.id === 'home') ? 'ds-btn-primary' : 'ds-btn-ghost'}`}
               >
-                <span className="text-lg">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
+                <span aria-hidden="true">{it.icon}</span> {it.label}
               </button>
             ))}
-
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? <FaSun className="text-xl" /> : <FaMoon className="text-xl" />}
+          </span>
+          <button onClick={toggleDarkMode} className="ds-btn ds-btn-ghost ds-btn-sm" aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'} aria-pressed={!!darkMode}>
+            {darkMode ? <FaSun aria-hidden="true" /> : <FaMoon aria-hidden="true" />}
+          </button>
+          {isAuthenticated && (
+            <button onClick={onLogout} className="ds-btn ds-btn-secondary ds-btn-sm">
+              <FaSignOutAlt aria-hidden="true" /> Logout
             </button>
-
-            {/* Logout Button */}
-            {isAuthenticated && (
-              <button
-                onClick={onLogout}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200"
-              >
-                <FaSignOutAlt />
-                <span className="font-medium">Logout</span>
-              </button>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-3">
-            {/* Dark Mode Toggle Mobile */}
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? <FaSun className="text-xl" /> : <FaMoon className="text-xl" />}
-            </button>
-
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <FaTimes className="text-2xl" /> : <FaBars className="text-2xl" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden overflow-hidden"
-            >
-              <div className="py-4 space-y-2">
-                {filteredNavItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      onNavigate(item.id);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                      activeRoute === item.id
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    <span className="text-xl">{item.icon}</span>
-                    <span className="font-medium">{item.label}</span>
-                  </button>
-                ))}
-
-                {isAuthenticated && (
-                  <button
-                    onClick={() => {
-                      onLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full flex items-center space-x-3 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200"
-                  >
-                    <FaSignOutAlt className="text-xl" />
-                    <span className="font-medium">Logout</span>
-                  </button>
-                )}
-              </div>
-            </motion.div>
           )}
-        </AnimatePresence>
+          <button onClick={() => setOpen((o) => !o)} className="ds-btn ds-btn-ghost ds-btn-sm navbar-mobile-btn" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open}>
+            {open ? <FaTimes aria-hidden="true" /> : <FaBars aria-hidden="true" />}
+          </button>
+        </nav>
       </div>
-    </nav>
+
+      <AnimatePresence>
+        {open && (
+          <motion.nav
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            aria-label="Mobile"
+            style={{ overflow: 'hidden', borderTop: '1px solid var(--ds-border)' }}
+          >
+            <div className="ds-container" style={{ display: 'grid', gap: 6, paddingTop: 10, paddingBottom: 12 }}>
+              {items.map((it) => (
+                <button key={it.id} onClick={() => go(it.id)} className={`ds-btn ${activeRoute === it.id ? 'ds-btn-primary' : 'ds-btn-secondary'}`}>
+                  <span aria-hidden="true">{it.icon}</span> {it.label}
+                </button>
+              ))}
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
+      <style>{`
+        @media (max-width: 860px) { .navbar-desktop { display: none !important; } }
+        @media (min-width: 861px) { .navbar-mobile-btn { display: none !important; } }
+      `}</style>
+    </header>
   );
 };
 
